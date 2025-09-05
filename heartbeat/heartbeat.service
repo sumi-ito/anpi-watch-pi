@@ -1,0 +1,8 @@
+[Unit]
+Description=Heartbeat -> /tmp + S3
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/pir-monitor/config.env
+ExecStart=/usr/bin/python3 /usr/local/bin/heartbeat.py
+User=root
