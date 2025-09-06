@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REPO=/home/ito/anpi-watch
+
+cd "$REPO"
+
+# 念のため許可（環境により safe.directory が必要）
+# git config --global --add safe.directory "$REPO" || true
+
+# 更新（main ブランチ想定）
+git fetch --prune
+git reset --hard origin/main
+git submodule update --init --recursive
+
+# 依存があればここで反映（例：pip, npm など）
+# /home/ito/venv/bin/pip install -r requirements.txt || true
+
+# リポジトリ内の unit を /etc/systemd/system にシンボリックリンクしている場合、
+# 変更が反映されるように daemon-reload と必要サービスの再起動をかける
+sudo /bin/systemctl daemon-reload
+sudo /bin/systemctl restart pir-watcher.service
+# oneshot は timer が起動するので通常は再起動不要だが、変更を即反映したいときは明示再実行
+# sudo /bin/systemctl restart heartbeat.service || true

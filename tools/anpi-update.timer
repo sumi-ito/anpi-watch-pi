@@ -1,0 +1,11 @@
+[Unit]
+Description=Run anpi-update every 6 hours
+
+[Timer]
+# 00, 06, 12, 18 時のちょうどに実行
+OnCalendar=*-*-* 00/6:00:00
+Persistent=true
+RandomizedDelaySec=180   # ばらけさせる（任意）
+
+[Install]
+WantedBy=timers.target
