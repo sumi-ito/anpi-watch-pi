@@ -50,10 +50,9 @@ sudo systemctl status pir-watcher.service
 sudo ln -s ~/anpi-watch/pi/heartbeat/heartbeat.py      /usr/local/bin/heartbeat.py
 sudo ln -s ~/anpi-watch/pi/heartbeat/heartbeat.service /etc/systemd/system/heartbeat.service
 sudo ln -s ~/anpi-watch/pi/heartbeat/heartbeat.timer   /etc/systemd/system/heartbeat.timer
-# sudo systemctl enable --now heartbeat.service
-# sudo systemctl disable heartbeat.service
+sudo systemctl enable --now heartbeat.service
 sudo systemctl enable --now heartbeat.timer
-# sudo systemctl status heartbeat.service
+sudo systemctl status heartbeat.service
 sudo systemctl status heartbeat.timer
 # 手動起動
 # sudo systemctl start heartbeat.timer
