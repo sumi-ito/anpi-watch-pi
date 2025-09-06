@@ -50,22 +50,25 @@ sudo systemctl status pir-watcher.service
 sudo ln -s ~/anpi-watch/pi/heartbeat/heartbeat.py      /usr/local/bin/heartbeat.py
 sudo ln -s ~/anpi-watch/pi/heartbeat/heartbeat.service /etc/systemd/system/heartbeat.service
 sudo ln -s ~/anpi-watch/pi/heartbeat/heartbeat.timer   /etc/systemd/system/heartbeat.timer
-sudo systemctl enable --now heartbeat.service
+# sudo systemctl enable --now heartbeat.service
+# sudo systemctl disable heartbeat.service
 sudo systemctl enable --now heartbeat.timer
-sudo systemctl status heartbeat.service
+# sudo systemctl status heartbeat.service
 sudo systemctl status heartbeat.timer
 # 手動起動
-# sudo systemctl start heartbeat.service
+# sudo systemctl start heartbeat.timer
 
 # 自動デプロイの設定
-sudo ln -s ~/anpi-watch/pi/tools/anpi-update.sh    /usr/local/bin/anpi-update.sh
+sudo ln -s ~/anpi-watch/pi/tools/anpi-update.sh      /usr/local/bin/anpi-update.sh
 sudo ln -s ~/anpi-watch/pi/tools/anpi-update.service /etc/systemd/system/anpi-update.service
 sudo ln -s ~/anpi-watch/pi/tools/anpi-update.timer   /etc/systemd/system/anpi-update.timer
 sudo systemctl daemon-reload
-sudo systemctl enable --now anpi-update.service
+# sudo systemctl enable --now anpi-update.service
+# sudo systemctl disable anpi-update.service
 sudo systemctl enable --now anpi-update.timer
 systemctl list-timers | grep anpi-update
-# sudo systemctl start anpi-update.service
+# sudo systemctl status anpi-update.timer
+# sudo systemctl start anpi-update.timer
 
 # 設定を再読み込み
 sudo systemctl daemon-reload

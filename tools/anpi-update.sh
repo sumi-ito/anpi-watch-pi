@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+# set -euo pipefail
 
 REPO=/home/ito/anpi-watch
 
@@ -22,3 +22,4 @@ sudo /bin/systemctl daemon-reload
 sudo /bin/systemctl restart pir-watcher.service
 # oneshot は timer が起動するので通常は再起動不要だが、変更を即反映したいときは明示再実行
 # sudo /bin/systemctl restart heartbeat.service || true
+# sudo /bin/systemctl restart anpi-update.service || true
