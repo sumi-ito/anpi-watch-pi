@@ -62,12 +62,14 @@ sudo ln -s ~/anpi-watch/pi/tools/anpi-update.sh      /usr/local/bin/anpi-update.
 sudo ln -s ~/anpi-watch/pi/tools/anpi-update.service /etc/systemd/system/anpi-update.service
 sudo ln -s ~/anpi-watch/pi/tools/anpi-update.timer   /etc/systemd/system/anpi-update.timer
 sudo systemctl daemon-reload
-# sudo systemctl enable --now anpi-update.service
-# sudo systemctl disable anpi-update.service
+sudo systemctl enable --now anpi-update.service
+# sudo systemctl status anpi-update.service
+# sudo systemctl start  anpi-update.service
+# sudo systemctl restart  anpi-update.service
 sudo systemctl enable --now anpi-update.timer
 systemctl list-timers | grep anpi-update
 # sudo systemctl status anpi-update.timer
-# sudo systemctl start anpi-update.timer
+# sudo systemctl start  anpi-update.timer
 
 # 設定を再読み込み
 sudo systemctl daemon-reload

@@ -9,4 +9,4 @@ User=ito
 Group=ito
 WorkingDirectory=/home/ito/anpi-watch
 Environment="PATH=/usr/local/bin:/usr/bin:/bin"
-ExecStart=/usr/local/bin/anpi-update.sh
+ExecStart=/usr/bin/sh /usr/local/bin/anpi-update.sh
