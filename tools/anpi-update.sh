@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # set -euo pipefail
 
-REPO=/home/ito/anpi-watch
+REPO=/home/anpi/anpi-watch
 
 cd "$REPO"
 
@@ -14,7 +14,7 @@ git reset --hard origin/main
 git submodule update --init --recursive
 
 # 依存があればここで反映（例：pip, npm など）
-# /home/ito/venv/bin/pip install -r requirements.txt || true
+# /home/anpi/venv/bin/pip install -r requirements.txt || true
 
 # リポジトリ内の unit を /etc/systemd/system にシンボリックリンクしている場合、
 # 変更が反映されるように daemon-reload と必要サービスの再起動をかける

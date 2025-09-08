@@ -1,12 +1,12 @@
 [Unit]
-Description=Pull latest code for anpi-watch (run as ito)
+Description=Pull latest code for anpi-watch (run as anpi)
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=oneshot
-User=ito
-Group=ito
-WorkingDirectory=/home/ito/anpi-watch
+User=anpi
+Group=anpi
+WorkingDirectory=/home/anpi/anpi-watch
 Environment="PATH=/usr/local/bin:/usr/bin:/bin"
 ExecStart=/usr/bin/sh /usr/local/bin/anpi-update.sh
