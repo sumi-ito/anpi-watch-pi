@@ -26,6 +26,8 @@ vi ~/.ssh/config
 #     IdentitiesOnly yes
 # ```
 chmod 600 ~/.ssh/config
+ssh -T github-anpi
+# => Hi sumi-ito/anpi-watch! You've successfully authenticated, but GitHub does not provide shell access.
 
 # アプリケーションのセットアップ
 cd ~
@@ -41,21 +43,25 @@ sudo ln -s ~/anpi-watch/pi/config.env /etc/pir-monitor/config.env
 # pir-watcherの設定
 sudo ln -s ~/anpi-watch/pi/pir-watcher/pir-watcher.py      /usr/local/bin/pir-watcher.py
 sudo ln -s ~/anpi-watch/pi/pir-watcher/pir-watcher.service /etc/systemd/system/pir-watcher.service
+sudo systemctl daemon-reload
 sudo systemctl enable --now pir-watcher.service
 sudo systemctl status pir-watcher.service
 # 手動起動
 # sudo systemctl start pir-watcher.service
+# sudo systemctl restart pir-watcher.service
 
 # heartbeatの設定
 sudo ln -s ~/anpi-watch/pi/heartbeat/heartbeat.py      /usr/local/bin/heartbeat.py
 sudo ln -s ~/anpi-watch/pi/heartbeat/heartbeat.service /etc/systemd/system/heartbeat.service
 sudo ln -s ~/anpi-watch/pi/heartbeat/heartbeat.timer   /etc/systemd/system/heartbeat.timer
+sudo systemctl daemon-reload
 sudo systemctl enable --now heartbeat.service
 sudo systemctl enable --now heartbeat.timer
 sudo systemctl status heartbeat.service
 sudo systemctl status heartbeat.timer
 # 手動起動
-# sudo systemctl start heartbeat.timer
+# sudo systemctl start heartbeat.service
+# sudo systemctl restart heartbeat.service
 
 # 自動デプロイの設定
 sudo ln -s ~/anpi-watch/pi/tools/anpi-update.sh      /usr/local/bin/anpi-update.sh
@@ -63,15 +69,12 @@ sudo ln -s ~/anpi-watch/pi/tools/anpi-update.service /etc/systemd/system/anpi-up
 sudo ln -s ~/anpi-watch/pi/tools/anpi-update.timer   /etc/systemd/system/anpi-update.timer
 sudo systemctl daemon-reload
 sudo systemctl enable --now anpi-update.service
-# sudo systemctl status anpi-update.service
-# sudo systemctl start  anpi-update.service
-# sudo systemctl restart  anpi-update.service
 sudo systemctl enable --now anpi-update.timer
 systemctl list-timers | grep anpi-update
-# sudo systemctl status anpi-update.timer
-# sudo systemctl start  anpi-update.timer
-
-# 設定を再読み込み
-sudo systemctl daemon-reload
+sudo systemctl status anpi-update.timer
+sudo systemctl status  anpi-update.service
+# 手動起動
+# sudo systemctl start  anpi-update.service
+# sudo systemctl restart  anpi-update.service
 
 sudo reboot
