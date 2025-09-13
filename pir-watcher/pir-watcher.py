@@ -44,10 +44,12 @@ def motion_callback(channel):
     if GPIO.input(PIR_PIN) == GPIO.HIGH:
         time.sleep(0.2)  # 更に200ms待機
         if GPIO.input(PIR_PIN) == GPIO.HIGH:
-            now = datetime.now(JST)
-            slot = current_slot_key(now)
-            local_flag = os.path.join(TMP_DIR, f"motion-{slot}")
-            put_s3_if_new(local_flag, slot)
+            time.sleep(0.3)  # 更に300ms待機
+            if GPIO.input(PIR_PIN) == GPIO.HIGH:
+                now = datetime.now(JST)
+                slot = current_slot_key(now)
+                local_flag = os.path.join(TMP_DIR, f"motion-{slot}")
+                put_s3_if_new(local_flag, slot)
 
 def main():
     if not DEVICE_ID or not S3_BUCKET:
