@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import os, subprocess
+import os, subprocess, json
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
@@ -10,6 +10,14 @@ REGION    = os.environ.get("REGION", "ap-northeast-1")
 TMP_DIR = "/tmp/pir"
 Path(TMP_DIR).mkdir(parents=True, exist_ok=True)
 JST = timezone(timedelta(hours=9))
+
+def get_cpu_temperature():
+    try:
+        with open('/sys/class/thermal/thermal_zone0/temp', 'r') as f:
+            temp_millidegree = int(f.read().strip())
+            return round(temp_millidegree / 1000.0, 1)
+    except (FileNotFoundError, ValueError, OSError):
+        return None
 
 def main():
     if not DEVICE_ID or not S3_BUCKET:
@@ -23,8 +31,16 @@ def main():
     if flag.exists():
         return
     flag.write_text("1")
+    
+    # ハートビートデータにCPU温度を含める
+    heartbeat_data = {
+        "timestamp": key,
+        "temperature": get_cpu_temperature()
+    }
+    
     s3_uri = f"s3://{S3_BUCKET}/devices/{DEVICE_ID}/heartbeat/{key}"
-    subprocess.run(["aws", "s3", "cp", "-", s3_uri, "--region", REGION], input=b"", check=False)
+    data = json.dumps(heartbeat_data, ensure_ascii=False).encode()
+    subprocess.run(["aws", "s3", "cp", "-", s3_uri, "--region", REGION], input=data, check=False)
 
 if __name__ == "__main__":
     main()
