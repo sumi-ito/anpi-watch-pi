@@ -18,7 +18,7 @@ JST = timezone(timedelta(hours=9))
 # https://osoyoo.com/ja/category/osoyoo-raspi-kit/osoyoo-starter-kit-v1-for-raspberry-pi/
 # https://osoyoo.com/ja/2017/07/04/raspi-pir-motion-sensor/
 def current_slot_key(dt: datetime) -> str:
-    # 10分刻みスロット: 12:03→12:00, 12:17→12:10
+    # 10分刻みスロットの場合: 12:03→12:00, 12:17→12:10
     minute_slot = (dt.minute // SLOT_MIN) * SLOT_MIN
     rounded = dt.replace(minute=minute_slot, second=0, microsecond=0)
     # ISO8601風: YYYY-MM-DDTHH:MM:00+09:00 のように出力
