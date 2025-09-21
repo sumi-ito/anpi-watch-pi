@@ -6,6 +6,7 @@ from pathlib import Path
 DEVICE_ID = os.environ.get("DEVICE_ID", "your-device-id")
 S3_BUCKET = os.environ.get("S3_BUCKET", "your-s3-bucket")
 REGION    = os.environ.get("REGION", "ap-northeast-1")
+VERSION   = "2025.09"
 
 TMP_DIR = "/tmp/pir"
 Path(TMP_DIR).mkdir(parents=True, exist_ok=True)
@@ -31,13 +32,14 @@ def main():
     if flag.exists():
         return
     flag.write_text("1")
-    
+
     # ハートビートデータにCPU温度を含める
     heartbeat_data = {
         "timestamp": key,
-        "temperature": get_cpu_temperature()
+        "temperature": get_cpu_temperature(),
+        "version": VERSION
     }
-    
+
     s3_uri = f"s3://{S3_BUCKET}/devices/{DEVICE_ID}/heartbeat/{key}"
     data = json.dumps(heartbeat_data, ensure_ascii=False).encode()
     subprocess.run(["aws", "s3", "cp", "-", s3_uri, "--region", REGION], input=data, check=False)
