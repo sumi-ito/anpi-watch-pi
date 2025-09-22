@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-import os, time, subprocess
+import os, time, subprocess, json
 from datetime import datetime, timezone, timedelta
+from pathlib import Path
 import RPi.GPIO as GPIO
 
 DEVICE_ID = os.environ.get("DEVICE_ID", "your-device-id")
@@ -8,6 +9,15 @@ S3_BUCKET = os.environ.get("S3_BUCKET", "your-s3-bucket")
 REGION    = os.environ.get("REGION", "ap-northeast-1")
 PIR_PIN   = int(os.environ.get("PIR_PIN", "17"))
 SLOT_MIN  = int(os.environ.get("MOTION_SLOT_MIN", "10"))
+
+def get_version():
+    try:
+        version_file = Path(__file__).parent.parent / "version.txt"
+        return version_file.read_text().strip()
+    except (FileNotFoundError, OSError):
+        return "unknown"
+
+VERSION = get_version()
 
 TMP_DIR = "/tmp/pir"
 os.makedirs(TMP_DIR, exist_ok=True)
@@ -30,11 +40,16 @@ def put_s3_if_new(local_flag_path: str, s3_key: str):
     # ローカルフラグ作成
     with open(local_flag_path, "w") as f:
         f.write("1")
-    # 中身不要 → 空オブジェクトをPUT
+    # version情報を含むJSONデータを作成
+    motion_data = {
+        "timestamp": s3_key,
+        "version": VERSION
+    }
     s3_uri = f"s3://{S3_BUCKET}/devices/{DEVICE_ID}/motion/{s3_key}"
+    data = json.dumps(motion_data, ensure_ascii=False).encode()
     subprocess.run(
         ["aws", "s3", "cp", "-", s3_uri, "--region", REGION],
-        input=b"", check=False
+        input=data, check=False
     )
     return True
 

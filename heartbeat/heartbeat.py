@@ -6,7 +6,14 @@ from pathlib import Path
 DEVICE_ID = os.environ.get("DEVICE_ID", "your-device-id")
 S3_BUCKET = os.environ.get("S3_BUCKET", "your-s3-bucket")
 REGION    = os.environ.get("REGION", "ap-northeast-1")
-VERSION   = "2025.09"
+def get_version():
+    try:
+        version_file = Path(__file__).parent.parent / "version.txt"
+        return version_file.read_text().strip()
+    except (FileNotFoundError, OSError):
+        return "unknown"
+
+VERSION = get_version()
 
 TMP_DIR = "/tmp/pir"
 Path(TMP_DIR).mkdir(parents=True, exist_ok=True)
