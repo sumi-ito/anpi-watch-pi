@@ -12,9 +12,13 @@ SLOT_MIN  = int(os.environ.get("MOTION_SLOT_MIN", "10"))
 
 def get_version():
     try:
-        version_file = Path(__file__).parent.parent / "version.txt"
+        # より堅牢なパス解決
+        script_dir = Path(__file__).resolve().parent
+        version_file = script_dir.parent / "version.txt"
         return version_file.read_text().strip()
-    except (FileNotFoundError, OSError):
+    except (FileNotFoundError, OSError) as e:
+        # デバッグ情報をログに出力
+        print(f"Version file error: {e}")
         return "unknown"
 
 VERSION = get_version()
