@@ -72,9 +72,15 @@ sudo systemctl enable --now anpi-update.service
 sudo systemctl enable --now anpi-update.timer
 systemctl list-timers | grep anpi-update
 sudo systemctl status anpi-update.timer
-sudo systemctl status  anpi-update.service
+sudo systemctl status anpi-update.service
 # 手動起動
 # sudo systemctl start  anpi-update.service
 # sudo systemctl restart  anpi-update.service
+
+# デバイス同期デーモンの初期設定（初回のみ）
+if [ ! -f /etc/systemd/system/sync_device_config.timer ]; then
+  echo "Setting up device sync daemon..."
+  bash ~/anpi-watch/pi/sync_device_config/install.sh
+fi
 
 sudo reboot

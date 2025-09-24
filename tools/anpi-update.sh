@@ -23,3 +23,9 @@ sudo /bin/systemctl restart pir-watcher.service
 # oneshot は timer が起動するので通常は再起動不要だが、変更を即反映したいときは明示再実行
 # sudo /bin/systemctl restart heartbeat.service || true
 # sudo /bin/systemctl restart anpi-update.service || true
+
+# デバイス同期デーモンの初期設定（初回のみ）
+if [ ! -f /etc/systemd/system/sync_device_config.timer ]; then
+  echo "Setting up device sync daemon..."
+  bash ~/anpi-watch/pi/sync_device_config/install.sh
+fi
