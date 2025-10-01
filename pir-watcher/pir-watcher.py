@@ -34,7 +34,7 @@ MOTION_PARAMS = {
     "zero": {
         "checks": 3,           # 確認回数
         "delays": [0.1, 0.2, 0.3, 0.4],  # 各確認間の待機時間(秒)
-        "bouncetime": 3000     # イベント検知後の不感時間(ms)
+        "bouncetime": 5000     # イベント検知後の不感時間(ms)
     },
     "zero2": {
         "checks": 2,
