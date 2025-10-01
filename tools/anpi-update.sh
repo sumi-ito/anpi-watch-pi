@@ -29,3 +29,9 @@ if [ ! -f /etc/systemd/system/sync_device_config.timer ]; then
   echo "Setting up device sync daemon..."
   bash ~/anpi-watch/pi/sync_device_config/install.sh
 fi
+
+CURRENT_HOUR=$(date +%H)
+if [ "$CURRENT_HOUR" = "06" ]; then
+  logger "anpi-watch: Scheduled reboot at 6:00"
+  sudo reboot
+fi
