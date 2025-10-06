@@ -2,8 +2,6 @@
 # PIR Watcher ログを S3 へアップロード
 # systemd timer (log-upload.timer) から毎日実行される
 
-set -euo pipefail
-
 # 環境変数を読み込み
 if [ -f /etc/pir-monitor/config.env ]; then
     set +u  # 未定義変数エラーを一時的に無効化
