@@ -2,7 +2,6 @@
 import os, time, threading, subprocess, json, logging
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
-from logging.handlers import TimedRotatingFileHandler
 import RPi.GPIO as GPIO
 
 # ====== 設定 ======
@@ -32,12 +31,9 @@ def setup_logging():
     console_handler.setFormatter(logging.Formatter('%(message)s'))
     logger.addHandler(console_handler)
 
-    # ファイル出力ハンドラ（日次ローテーション）
-    file_handler = TimedRotatingFileHandler(
+    # ファイル出力ハンドラ（logrotateでローテーション管理）
+    file_handler = logging.FileHandler(
         f"{LOG_DIR}/pir-watcher.log",
-        when="midnight",
-        interval=1,
-        backupCount=7,
         encoding='utf-8'
     )
     # ISO8601形式のタイムスタンプ + ログレベル + メッセージ

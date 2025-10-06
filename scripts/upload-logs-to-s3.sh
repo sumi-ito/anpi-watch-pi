@@ -1,6 +1,6 @@
 #!/bin/bash
 # PIR Watcher ログを S3 へアップロード
-# logrotate の postrotate スクリプトから呼ばれる
+# systemd timer (log-upload.timer) から毎日実行される
 
 set -euo pipefail
 
@@ -27,9 +27,11 @@ for gz_file in "$LOG_DIR"/*.gz; do
     # ファイル名から日付を推測（pir-watcher.log.YYYY-MM-DD.gz）
     filename=$(basename "$gz_file")
 
-    # 日付抽出（ファイル名パターン: pir-watcher.log.2025-10-05.gz）
-    if [[ "$filename" =~ ([0-9]{4}-[0-9]{2}-[0-9]{2}) ]]; then
-        log_date="${BASH_REMATCH[1]}"
+    # 日付抽出（ファイル名パターン: pir-watcher.log-20251005.gz）
+    if [[ "$filename" =~ -([0-9]{8})\.gz$ ]]; then
+        log_date_raw="${BASH_REMATCH[1]}"
+        # YYYYMMDD -> YYYY-MM-DD に変換
+        log_date="${log_date_raw:0:4}-${log_date_raw:4:2}-${log_date_raw:6:2}"
     else
         # 日付が取れない場合はファイルの最終更新日を使用
         log_date=$(date -r "$gz_file" +%Y-%m-%d)
