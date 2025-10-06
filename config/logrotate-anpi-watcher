@@ -1,0 +1,10 @@
+/home/anpi/anpi-watch/logs/*.log {
+    daily
+    rotate 7
+    missingok
+    notifempty
+    compress
+    delaycompress
+    sharedscripts
+    # S3アップロードは systemd timer (log-upload.timer) で実行
+}

@@ -1,0 +1,11 @@
+[Unit]
+Description=Upload PIR Watcher logs to S3
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/pir-monitor/config.env
+ExecStart=/usr/local/bin/upload-logs-to-s3.sh
+StandardOutput=journal
+StandardError=journal

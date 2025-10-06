@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-import os, time, threading, subprocess, json
+import os, time, threading, subprocess, json, logging
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
+from logging.handlers import TimedRotatingFileHandler
 import RPi.GPIO as GPIO
 
 # ====== 設定 ======
@@ -16,6 +17,39 @@ REGION    = os.environ.get("REGION", "ap-northeast-1")
 # 一時保存先
 TMP_DIR = "/tmp/pir"
 os.makedirs(TMP_DIR, exist_ok=True)
+
+# ログ設定
+LOG_DIR = "/home/anpi/anpi-watch/logs"
+os.makedirs(LOG_DIR, exist_ok=True)
+
+def setup_logging():
+    """ログ設定（標準出力 + ファイル出力）"""
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+
+    # 標準出力ハンドラ（既存の print 出力互換）
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(logging.Formatter('%(message)s'))
+    logger.addHandler(console_handler)
+
+    # ファイル出力ハンドラ（日次ローテーション）
+    file_handler = TimedRotatingFileHandler(
+        f"{LOG_DIR}/pir-watcher.log",
+        when="midnight",
+        interval=1,
+        backupCount=7,
+        encoding='utf-8'
+    )
+    # ISO8601形式のタイムスタンプ + ログレベル + メッセージ
+    file_handler.setFormatter(logging.Formatter(
+        '%(asctime)s [%(levelname)s] %(message)s',
+        datefmt='%Y-%m-%dT%H:%M:%S%z'
+    ))
+    logger.addHandler(file_handler)
+
+    return logger
+
+logger = setup_logging()
 
 # 計測単位の設定 デフォルト: 10分毎
 SLOT_MIN = int(os.environ.get("MOTION_SLOT_MIN", "10"))
@@ -110,6 +144,7 @@ INC_PER_EVENT   = get_param("INC_PER_EVENT", 20)    # 立ち上がり1回の加�
 THRESHOLD       = get_param("THRESHOLD", 60)        # これ以上で確定
 CLEAR_THRESHOLD = get_param("CLEAR_THRESHOLD", 36)  # 解除域（ヒステリシス）
 BUFFER_SEC      = get_param("BUFFER_SEC", 5)        # 1回検知後の"最近動いた"判定バッファ
+MAX_SCORE       = THRESHOLD * 2                      # スコアの上限（閾値の2倍）
 # ==================
 
 lock = threading.Lock()
@@ -124,7 +159,7 @@ def get_version():
         version_file = script_dir.parent / "version.txt"
         return version_file.read_text().strip()
     except (FileNotFoundError, OSError) as e:
-        # デバッグ情報をログに出力
+        # ロギング設定前なので print
         print(f"Version file error: {e}")
         return "unknown"
 
@@ -161,9 +196,9 @@ def motion_callback(channel):
     global score, last_detected
     now = datetime.now(JST)
     with lock:
-        score += INC_PER_EVENT
+        score = min(score + INC_PER_EVENT, MAX_SCORE)
         last_detected = now
-        print(f"{now.isoformat()}, {DEVICE_MODEL}: RISING (+{INC_PER_EVENT}) score={score}", flush=True)
+        logger.info(f"{DEVICE_MODEL}: event=RISING inc={INC_PER_EVENT} score={score} max={MAX_SCORE}")
 
 
 
@@ -171,16 +206,10 @@ def main():
     global score, detected
 
     # 起動時パラメータ表示
-    print(f"=== PIR Watcher Started ===", flush=True)
-    print(f"Device Model: {DEVICE_MODEL}", flush=True)
-    print(f"Sensitivity: {SENSITIVITY}", flush=True)
-    print(f"Parameters:", flush=True)
-    print(f"  LEAK_PER_SEC: {LEAK_PER_SEC}", flush=True)
-    print(f"  INC_PER_EVENT: {INC_PER_EVENT}", flush=True)
-    print(f"  THRESHOLD: {THRESHOLD}", flush=True)
-    print(f"  CLEAR_THRESHOLD: {CLEAR_THRESHOLD}", flush=True)
-    print(f"  BUFFER_SEC: {BUFFER_SEC}", flush=True)
-    print(f"==========================", flush=True)
+    logger.info("=== PIR Watcher Started ===")
+    logger.info(f"version={VERSION} device_model={DEVICE_MODEL} sensitivity={SENSITIVITY}")
+    logger.info(f"params: LEAK_PER_SEC={LEAK_PER_SEC} INC_PER_EVENT={INC_PER_EVENT} THRESHOLD={THRESHOLD} CLEAR_THRESHOLD={CLEAR_THRESHOLD} BUFFER_SEC={BUFFER_SEC} MAX_SCORE={MAX_SCORE}")
+    logger.info("===========================")
 
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(PIR_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
@@ -199,28 +228,23 @@ def main():
                 # ヒステリシスつきの確定/解除
                 if not detected and score >= THRESHOLD:
                     detected = True
-                    print(
-                        f"{now.isoformat()}, {DEVICE_MODEL}: CONFIRMED score={score} "
-                        f"(>= {THRESHOLD})", flush=True
-                    )
+                    logger.info(f"{DEVICE_MODEL}: event=CONFIRMED score={score} threshold={THRESHOLD}")
                     now = datetime.now(JST)
                     slot = current_slot_key(now)
                     local_flag = os.path.join(TMP_DIR, f"motion-{slot}")
                     put_s3_if_new(local_flag, slot)
                 elif detected and score < CLEAR_THRESHOLD:
                     detected = False
-                    print(
-                        f"{now.isoformat()}, {DEVICE_MODEL}: CLEARED score={score} "
-                        f"(< {CLEAR_THRESHOLD})", flush=True
-                    )
+                    logger.info(f"{DEVICE_MODEL}: event=CLEARED score={score} clear_threshold={CLEAR_THRESHOLD}")
+                    now = datetime.now(JST)
+                    slot = current_slot_key(now)
+                    local_flag = os.path.join(TMP_DIR, f"motion-{slot}")
+                    put_s3_if_new(local_flag, slot)
 
-                # 直近5秒以内の“最近動いた”ステータス（観測用）
+                # 直近5秒以内の"最近動いた"ステータス（観測用）
                 recent = 1 if (last_detected and (now - last_detected).total_seconds() < BUFFER_SEC) else 0
 
-                print(
-                    f"{now.isoformat()}, {DEVICE_MODEL}: score={score} recent={recent} detected={int(detected)}",
-                    flush=True
-                )
+                logger.info(f"{DEVICE_MODEL}: score={score} recent={recent} detected={int(detected)}")
 
             time.sleep(1)
     finally:

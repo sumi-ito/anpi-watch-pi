@@ -30,6 +30,29 @@ if [ ! -f /etc/systemd/system/sync_device_config.timer ]; then
   bash ~/anpi-watch/pi/sync_device_config/install.sh
 fi
 
+# ログ管理の初期設定（初回のみ）
+if [ ! -f /etc/systemd/system/log-upload.timer ]; then
+  echo "Setting up log management (S3 + logrotate + systemd timer)..."
+
+  # S3アップロードスクリプトのシンボリックリンク
+  sudo ln -sf "$REPO/pi/scripts/upload-logs-to-s3.sh" /usr/local/bin/upload-logs-to-s3.sh
+
+  # logrotate設定のシンボリックリンク
+  sudo ln -sf "$REPO/pi/config/logrotate-anpi-watcher" /etc/logrotate.d/anpi-watcher
+
+  # ログディレクトリの作成
+  mkdir -p "$REPO/logs"
+
+  # systemd timer + service のシンボリックリンク
+  sudo ln -sf "$REPO/pi/log-upload/log-upload.service" /etc/systemd/system/log-upload.service
+  sudo ln -sf "$REPO/pi/log-upload/log-upload.timer" /etc/systemd/system/log-upload.timer
+  sudo systemctl daemon-reload
+  sudo systemctl enable log-upload.timer
+  sudo systemctl start log-upload.timer
+
+  echo "Log management setup completed."
+fi
+
 CURRENT_HOUR=$(date +%H)
 if [ "$CURRENT_HOUR" = "06" ]; then
   logger "anpi-watch: Scheduled reboot at 6:00"

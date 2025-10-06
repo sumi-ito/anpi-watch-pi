@@ -1,0 +1,10 @@
+[Unit]
+Description=Upload PIR Watcher logs to S3 daily at 3:00 AM
+
+[Timer]
+# 毎日 3:00 AM に実行（logrotate 後の時間帯）
+OnCalendar=*-*-* 03:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
