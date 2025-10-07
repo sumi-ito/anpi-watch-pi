@@ -37,8 +37,8 @@ if [ ! -f /etc/systemd/system/log-upload.timer ]; then
   # S3アップロードスクリプトのシンボリックリンク
   sudo ln -sf "$REPO/pi/scripts/upload-logs-to-s3.sh" /usr/local/bin/upload-logs-to-s3.sh
 
-  # logrotate設定のシンボリックリンク
-  sudo ln -sf "$REPO/pi/config/logrotate-anpi-watcher" /etc/logrotate.d/anpi-watcher
+  # logrotate設定のコピー
+  sudo cp "$REPO/pi/config/logrotate-anpi-watcher" /etc/logrotate.d/anpi-watcher
 
   # ログディレクトリの作成
   mkdir -p "$REPO/logs"
