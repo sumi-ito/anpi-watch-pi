@@ -4,9 +4,11 @@
     missingok
     notifempty
     compress
-    delaycompress
     dateext
     dateformat -%Y%m%d
     sharedscripts
     # S3アップロードは systemd timer (log-upload.timer) で実行
+    postrotate
+        systemctl restart pir-watcher.service
+    endscript
 }
