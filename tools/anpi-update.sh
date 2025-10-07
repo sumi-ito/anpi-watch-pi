@@ -34,8 +34,9 @@ fi
 if [ ! -f /etc/systemd/system/log-upload.timer ]; then
   echo "Setting up log management (S3 + logrotate + systemd timer)..."
 
-  # S3アップロードスクリプトのシンボリックリンク
-  sudo ln -sf "$REPO/pi/scripts/upload-logs-to-s3.sh" /usr/local/bin/upload-logs-to-s3.sh
+  # S3アップロードスクリプトのファイルコピー
+  sudo cp "$REPO/pi/scripts/upload-logs-to-s3.sh" /usr/local/bin/upload-logs-to-s3.sh
+  sudo chmod +x /usr/local/bin/upload-logs-to-s3.sh
 
   # logrotate設定のコピー
   sudo cp "$REPO/pi/config/logrotate-anpi-watcher" /etc/logrotate.d/anpi-watcher
@@ -43,9 +44,9 @@ if [ ! -f /etc/systemd/system/log-upload.timer ]; then
   # ログディレクトリの作成
   mkdir -p "$REPO/logs"
 
-  # systemd timer + service のシンボリックリンク
-  sudo ln -sf "$REPO/pi/log-upload/log-upload.service" /etc/systemd/system/log-upload.service
-  sudo ln -sf "$REPO/pi/log-upload/log-upload.timer" /etc/systemd/system/log-upload.timer
+  # systemd timer + service のファイルコピー
+  sudo cp "$REPO/pi/log-upload/log-upload.service" /etc/systemd/system/log-upload.service
+  sudo cp "$REPO/pi/log-upload/log-upload.timer" /etc/systemd/system/log-upload.timer
   sudo systemctl daemon-reload
   sudo systemctl enable log-upload.timer
   sudo systemctl start log-upload.timer
