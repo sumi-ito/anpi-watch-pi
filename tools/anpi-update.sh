@@ -13,6 +13,40 @@ git fetch --prune
 git reset --hard origin/main
 git submodule update --init --recursive
 
+if [ ! -f /etc/systemd/system/pir-watcher.service ]; then
+  echo "Setting up pir-watcher daemon..."
+  sudo ln -s ~/anpi-watch/pi/pir-watcher/pir-watcher.py      /usr/local/bin/pir-watcher.py
+  sudo ln -s ~/anpi-watch/pi/pir-watcher/pir-watcher.service /etc/systemd/system/pir-watcher.service
+  sudo systemctl daemon-reload
+  sudo systemctl enable pir-watcher.service
+  echo "pir-watcher daemon setup completed."
+fi
+
+if [ ! -f /etc/systemd/system/heartbeat.timer ]; then
+  echo "Setting up heartbeat daemon..."
+  sudo ln -s ~/anpi-watch/pi/heartbeat/heartbeat.py      /usr/local/bin/heartbeat.py
+  sudo ln -s ~/anpi-watch/pi/heartbeat/heartbeat.service /etc/systemd/system/heartbeat.service
+  sudo ln -s ~/anpi-watch/pi/heartbeat/heartbeat.timer   /etc/systemd/system/heartbeat.timer
+  sudo systemctl daemon-reload
+  sudo systemctl enable heartbeat.service
+  sudo systemctl enable heartbeat.timer
+  echo "heartbeat daemon setup completed."
+fi
+
+if [ ! -f /etc/systemd/system/anpi-update.timer ]; then
+  echo "Setting up deploy automation daemon..."
+  sudo ln -s ~/anpi-watch/pi/tools/anpi-update.sh      /usr/local/bin/anpi-update.sh
+  sudo ln -s ~/anpi-watch/pi/tools/anpi-update.service /etc/systemd/system/anpi-update.service
+  sudo ln -s ~/anpi-watch/pi/tools/anpi-update.timer   /etc/systemd/system/anpi-update.timer
+  sudo systemctl daemon-reload
+  sudo systemctl enable anpi-update.service
+  sudo systemctl enable anpi-update.timer
+  # systemctl list-timers | grep anpi-update
+  # sudo systemctl status anpi-update.timer
+  # sudo systemctl status anpi-update.service
+  echo "deploy automation daemon setup completed."
+fi
+
 # 依存があればここで反映（例：pip, npm など）
 # /home/anpi/venv/bin/pip install -r requirements.txt || true
 

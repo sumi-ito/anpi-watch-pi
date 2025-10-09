@@ -28,6 +28,7 @@ Raspberry Pi (Zero/Zero2)
 ```
 
 以下が自動でインストールされます:
+
 - `/usr/local/bin/upload-logs-to-s3.sh` - S3アップロードスクリプト
 - `/etc/logrotate.d/anpi-watcher` - logrotate設定
 - `/etc/systemd/system/log-upload.service` - S3アップロードサービス
@@ -114,7 +115,7 @@ AWS Console > Athena で以下を実行:
 
 ```bash
 # SQLファイルを編集（S3バケット名、デバイスIDリストを修正）
-vi pi/config/athena-table.sql
+vi aws/config/athena/athena-table.sql
 
 # Athena でテーブル作成
 # (AWSコンソールから athena-table.sql の内容を実行)
