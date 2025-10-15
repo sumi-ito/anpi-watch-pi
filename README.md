@@ -18,8 +18,8 @@ graph TB
     end
 
     subgraph "Storage"
-        LOCAL[/home/anpi/anpi-watch/logs/<br/>pir-watcher.log]
-        CONFIG[/home/anpi/anpi-watch/pi/config/<br/>local_device_config.json]
+        LOCAL[anpi-watch/logs/<br/>pir-watcher.log]
+        CONFIG[anpi-watch/pi/config/<br/>local_device_config.json]
     end
 
     subgraph "AWS S3"
@@ -39,12 +39,12 @@ graph TB
 
 ## コンポーネント一覧
 
-| コンポーネント | 役割 | 実行方式 | 実行頻度 |
-|--------------|------|---------|---------|
-| [pir-watcher](pir-watcher/README.md) | 人感センサー監視・記録 | systemd service | 常駐 |
-| [heartbeat](heartbeat/README.md) | 生存確認・CPU温度送信 | systemd timer | 10分毎 |
-| [log-upload](LOGGING.md#log-upload) | ログS3アップロード | systemd timer | 日次3時 |
-| [sync_device_config](sync_device_config/README.md) | 設定同期 | systemd timer | 日次 |
+| コンポーネント                                     | 役割                   | 実行方式        | 実行頻度 |
+| -------------------------------------------------- | ---------------------- | --------------- | -------- |
+| [pir-watcher](pir-watcher/README.md)               | 人感センサー監視・記録 | systemd service | 常駐     |
+| [heartbeat](heartbeat/README.md)                   | 生存確認・CPU温度送信  | systemd timer   | 10分毎   |
+| [log-upload](LOGGING.md#log-upload)                | ログS3アップロード     | systemd timer   | 日次3時  |
+| [sync_device_config](sync_device_config/README.md) | 設定同期               | systemd timer   | 日次     |
 
 ## データフロー
 
@@ -176,6 +176,7 @@ sudo /home/anpi/anpi-watch/pi/tools/anpi-update.sh
 ```
 
 以下が自動実行されます:
+
 - systemdサービス/タイマー設定
 - logrotate設定
 - ログディレクトリ作成
@@ -228,12 +229,12 @@ aws s3 ls s3://${S3_BUCKET}/logs/${DEVICE_ID}/
 
 ### リソース使用量
 
-| メトリクス | pir-watcher | heartbeat | 合計 |
-|-----------|------------|-----------|------|
-| CPU使用率 | 1-3% | <1% (実行時) | ~3% |
-| メモリ | ~10MB | ~5MB (実行時) | ~15MB |
-| ディスクI/O | 最小限 | 最小限 | 最小限 |
-| ネットワーク | ~100B/検知 | ~500B/10分 | ~1KB/10分 |
+| メトリクス   | pir-watcher | heartbeat     | 合計      |
+| ------------ | ----------- | ------------- | --------- |
+| CPU使用率    | 1-3%        | <1% (実行時)  | ~3%       |
+| メモリ       | ~10MB       | ~5MB (実行時) | ~15MB     |
+| ディスクI/O  | 最小限      | 最小限        | 最小限    |
+| ネットワーク | ~100B/検知  | ~500B/10分    | ~1KB/10分 |
 
 ### Raspberry Pi Zero/Zero 2での動作
 
