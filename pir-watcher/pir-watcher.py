@@ -225,13 +225,13 @@ def main():
                 if not detected and score >= THRESHOLD:
                     detected = True
                     logger.info(f"{DEVICE_MODEL}: event=CONFIRMED score={score} threshold={THRESHOLD}")
-                elif detected and score < CLEAR_THRESHOLD:
-                    detected = False
-                    logger.info(f"{DEVICE_MODEL}: event=CLEARED score={score} clear_threshold={CLEAR_THRESHOLD}")
                     now = datetime.now(JST)
                     slot = current_slot_key(now)
                     local_flag = os.path.join(TMP_DIR, f"motion-{slot}")
                     put_s3_if_new(local_flag, slot)
+                elif detected and score < CLEAR_THRESHOLD:
+                    detected = False
+                    logger.info(f"{DEVICE_MODEL}: event=CLEARED score={score} clear_threshold={CLEAR_THRESHOLD}")
 
                 # 直近5秒以内の"最近動いた"ステータス（観測用）
                 recent = 1 if (last_detected and (now - last_detected).total_seconds() < BUFFER_SEC) else 0
