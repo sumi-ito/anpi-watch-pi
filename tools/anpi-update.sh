@@ -18,7 +18,7 @@ if [ ! -f /etc/systemd/system/pir-watcher.service ]; then
   sudo ln -s ~/anpi-watch/pi/pir-watcher/pir-watcher.py      /usr/local/bin/pir-watcher.py
   sudo ln -s ~/anpi-watch/pi/pir-watcher/pir-watcher.service /etc/systemd/system/pir-watcher.service
   sudo systemctl daemon-reload
-  sudo systemctl enable pir-watcher.service
+  sudo systemctl enable --now pir-watcher.service
   echo "pir-watcher daemon setup completed."
 fi
 
@@ -28,8 +28,8 @@ if [ ! -f /etc/systemd/system/heartbeat.timer ]; then
   sudo ln -s ~/anpi-watch/pi/heartbeat/heartbeat.service /etc/systemd/system/heartbeat.service
   sudo ln -s ~/anpi-watch/pi/heartbeat/heartbeat.timer   /etc/systemd/system/heartbeat.timer
   sudo systemctl daemon-reload
-  sudo systemctl enable heartbeat.service
-  sudo systemctl enable heartbeat.timer
+  sudo systemctl enable --now heartbeat.service
+  sudo systemctl enable --now heartbeat.timer
   echo "heartbeat daemon setup completed."
 fi
 
@@ -39,8 +39,8 @@ if [ ! -f /etc/systemd/system/anpi-update.timer ]; then
   sudo ln -s ~/anpi-watch/pi/tools/anpi-update.service /etc/systemd/system/anpi-update.service
   sudo ln -s ~/anpi-watch/pi/tools/anpi-update.timer   /etc/systemd/system/anpi-update.timer
   sudo systemctl daemon-reload
-  sudo systemctl enable anpi-update.service
-  sudo systemctl enable anpi-update.timer
+  # sudo systemctl enable --now anpi-update.service
+  sudo systemctl enable --now anpi-update.timer
   # systemctl list-timers | grep anpi-update
   # sudo systemctl status anpi-update.timer
   # sudo systemctl status anpi-update.service
@@ -77,13 +77,14 @@ if [ ! -f /etc/systemd/system/log-upload.timer ]; then
 
   # ログディレクトリの作成
   mkdir -p "$REPO/logs"
+  chmod 755 "$REPO/logs"
 
   # systemd timer + service のファイルコピー
   sudo cp "$REPO/pi/log-upload/log-upload.service" /etc/systemd/system/log-upload.service
   sudo cp "$REPO/pi/log-upload/log-upload.timer" /etc/systemd/system/log-upload.timer
   sudo systemctl daemon-reload
-  sudo systemctl enable log-upload.timer
-  sudo systemctl start log-upload.timer
+  sudo systemctl enable --now log-upload.timer
+  # sudo systemctl start log-upload.timer
 
   echo "Log management setup completed."
 fi
