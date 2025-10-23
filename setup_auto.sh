@@ -1,8 +1,7 @@
 #!/bin/bash
 # Raspberry Pi 自動セットアップスクリプト（anpi-watch）
 # Usage: bash setup_auto.sh
-
-# set -e
+# scp ./pi/setup_auto.sh anpi@192.168.3.102:~/
 
 # 色付きログ用
 RED='\033[0;31m'
@@ -16,31 +15,102 @@ echo -e "${BLUE}  Raspberry Pi セットアップ (anpi-watch)${NC}"
 echo -e "${BLUE}========================================${NC}\n"
 
 # ========================================
-# Step 1: 必要な情報の入力
+# Step 0: 既存設定の確認と読み込み
 # ========================================
-echo -e "${YELLOW}📝 Step 1: デバイス情報の入力${NC}\n"
+CONFIG_FILE="/home/anpi/anpi-watch/pi/config.env"
+SKIP_INPUT=false
 
-read -p "Device ID (例: ito-raspi-01): " DEVICE_ID
-read -p "S3 Bucket Name (例: anpi-watch-data): " S3_BUCKET
-read -p "AWS Region [ap-northeast-1]: " REGION
-REGION=${REGION:-ap-northeast-1}
+if [ -f "$CONFIG_FILE" ]; then
+    echo -e "${YELLOW}📄 既存の config.env が見つかりました${NC}"
+    echo -e "${BLUE}既存の設定を読み込んでいます...${NC}\n"
 
-echo ""
-read -p "AWS Access Key ID: " AWS_ACCESS_KEY_ID
-read -sp "AWS Secret Access Key: " AWS_SECRET_ACCESS_KEY
-echo ""
+    # 既存の設定を読み込み（エラーを無視）
+    set +e
+    source "$CONFIG_FILE"
+    set -e
 
-echo -e "\n${BLUE}確認:${NC}"
-echo -e "  Device ID: ${DEVICE_ID}"
-echo -e "  S3 Bucket: ${S3_BUCKET}"
-echo -e "  Region:    ${REGION}"
-echo -e "  Access Key ID: ${AWS_ACCESS_KEY_ID}"
-echo ""
+    # 読み込んだ値をデフォルトとして表示
+    if [ -n "$DEVICE_ID" ] || [ -n "$S3_BUCKET" ]; then
+        echo -e "${GREEN}現在の設定:${NC}"
+        echo -e "  Device ID:     ${DEVICE_ID:-未設定}"
+        echo -e "  S3 Bucket:     ${S3_BUCKET:-未設定}"
+        echo -e "  Region:        ${REGION:-ap-northeast-1}"
+        [ -n "$AWS_ACCESS_KEY_ID" ] && echo -e "  Access Key ID: ${AWS_ACCESS_KEY_ID:0:8}***" || echo -e "  Access Key ID: 未設定"
+        echo ""
 
-read -p "この内容でセットアップを開始しますか？ (y/n): " CONFIRM
-if [ "$CONFIRM" != "y" ]; then
-    echo -e "${RED}セットアップをキャンセルしました${NC}"
-    exit 0
+        read -p "この設定を使用しますか？ (y/n): " USE_EXISTING
+        if [ "$USE_EXISTING" = "y" ]; then
+            echo -e "${GREEN}✓ 既存の設定を使用します${NC}\n"
+            SKIP_INPUT=true
+        else
+            echo -e "${YELLOW}新しい設定を入力してください${NC}\n"
+        fi
+    else
+        echo -e "${YELLOW}⚠️  config.env は存在しますが、設定が空です${NC}\n"
+    fi
+else
+    echo -e "${BLUE}ℹ️  初回セットアップです${NC}\n"
+fi
+
+# ========================================
+# Step 1: 必要な情報の入力（新規または変更時）
+# ========================================
+if [ "$SKIP_INPUT" != "true" ]; then
+    echo -e "${YELLOW}📝 Step 1: デバイス情報の入力${NC}\n"
+
+    # デフォルト値がある場合は表示
+    if [ -n "$DEVICE_ID" ]; then
+        read -p "Device ID [$DEVICE_ID]: " INPUT_DEVICE_ID
+        DEVICE_ID=${INPUT_DEVICE_ID:-$DEVICE_ID}
+    else
+        read -p "Device ID (例: ito-raspi-01): " DEVICE_ID
+    fi
+
+    if [ -n "$S3_BUCKET" ]; then
+        read -p "S3 Bucket Name [$S3_BUCKET]: " INPUT_S3_BUCKET
+        S3_BUCKET=${INPUT_S3_BUCKET:-$S3_BUCKET}
+    else
+        read -p "S3 Bucket Name (例: anpi-watch-data): " S3_BUCKET
+    fi
+
+    if [ -n "$REGION" ]; then
+        read -p "AWS Region [$REGION]: " INPUT_REGION
+        REGION=${INPUT_REGION:-$REGION}
+    else
+        read -p "AWS Region [ap-northeast-1]: " REGION
+        REGION=${REGION:-ap-northeast-1}
+    fi
+
+    echo ""
+
+    if [ -n "$AWS_ACCESS_KEY_ID" ]; then
+        read -p "AWS Access Key ID [${AWS_ACCESS_KEY_ID:0:8}***]: " INPUT_ACCESS_KEY
+        AWS_ACCESS_KEY_ID=${INPUT_ACCESS_KEY:-$AWS_ACCESS_KEY_ID}
+    else
+        read -p "AWS Access Key ID: " AWS_ACCESS_KEY_ID
+    fi
+
+    if [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
+        read -sp "AWS Secret Access Key [***existing***]: " INPUT_SECRET_KEY
+        echo ""
+        AWS_SECRET_ACCESS_KEY=${INPUT_SECRET_KEY:-$AWS_SECRET_ACCESS_KEY}
+    else
+        read -sp "AWS Secret Access Key: " AWS_SECRET_ACCESS_KEY
+        echo ""
+    fi
+
+    echo -e "\n${BLUE}確認:${NC}"
+    echo -e "  Device ID: ${DEVICE_ID}"
+    echo -e "  S3 Bucket: ${S3_BUCKET}"
+    echo -e "  Region:    ${REGION}"
+    echo -e "  Access Key ID: ${AWS_ACCESS_KEY_ID}"
+    echo ""
+
+    read -p "この内容でセットアップを開始しますか？ (y/n): " CONFIRM
+    if [ "$CONFIRM" != "y" ]; then
+        echo -e "${RED}セットアップをキャンセルしました${NC}"
+        exit 0
+    fi
 fi
 
 # ========================================
@@ -166,7 +236,8 @@ AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}"
 AWS_DEFAULT_REGION="${REGION}"
 EOF
 
-# config.envを配置
+# config.envを配置（既存のシンボリックリンクがあれば削除）
+sudo rm -f /etc/pir-monitor/config.env
 sudo ln -s ~/anpi-watch/pi/config.env /etc/pir-monitor/config.env
 
 echo -e "${GREEN}✓ config.env を作成しました${NC}\n"
@@ -200,7 +271,7 @@ echo "setup test" | aws s3 cp - "s3://${S3_BUCKET}/${TEST_KEY}" --region ${REGIO
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✓ S3への書き込みテスト成功${NC}\n"
     # テストファイルを削除
-    aws s3 rm "s3://${S3_BUCKET}/${TEST_KEY}" --region ${REGION} 2>/dev/null
+    # aws s3 rm "s3://${S3_BUCKET}/${TEST_KEY}" --region ${REGION} 2>/dev/null
 else
     echo -e "${RED}❌ S3への書き込みに失敗しました${NC}"
     echo "IAMユーザーに以下の権限が必要です:"
