@@ -1,6 +1,8 @@
-# Raspberry Pi コンポーネント
+# anpi-watch-pi
 
-anpi-watchシステムのRaspberry Pi側コンポーネントの概要です。
+Raspberry Pi + 人感センサーを用いた安否監視システムのデバイス側コンポーネント
+
+このリポジトリは [anpi-watch](https://github.com/yourusername/anpi-watch) から分離されたRaspberry Pi専用リポジトリです。
 
 ## 構成
 
@@ -124,32 +126,30 @@ sequenceDiagram
 ## ディレクトリ構造
 
 ```
-/home/anpi/anpi-watch/
-├── pi/
-│   ├── config/
-│   │   ├── local_device_config.json   # デバイス設定
-│   │   ├── runtime_status.json        # 実行時ステータス
-│   │   └── logrotate-anpi-watcher     # logrotate設定
-│   ├── heartbeat/
-│   │   ├── heartbeat.py               # heartbeatスクリプト
-│   │   ├── heartbeat.service          # systemd service定義
-│   │   └── heartbeat.timer            # systemd timer定義
-│   ├── pir-watcher/
-│   │   ├── pir-watcher.py             # 人感センサー監視
-│   │   └── pir-watcher.service        # systemd service定義
-│   ├── log-upload/
-│   │   ├── log-upload.service         # systemd service定義
-│   │   └── log-upload.timer           # systemd timer定義
-│   ├── sync_device_config/
-│   │   └── sync_device_config.py      # 設定同期スクリプト
-│   ├── scripts/
-│   │   └── upload-logs-to-s3.sh       # ログアップロードスクリプト
-│   ├── tools/
-│   │   └── anpi-update.sh             # 自動セットアップ・更新
-│   └── logs/
-│       └── pir-watcher.log            # PIRログファイル
-└── scripts/
-    └── device_status_manager.py       # サービス管理スクリプト
+/home/anpi/anpi-watch-pi/
+├── config/
+│   ├── local_device_config.json   # デバイス設定
+│   ├── runtime_status.json        # 実行時ステータス
+│   └── logrotate-anpi-watcher     # logrotate設定
+├── heartbeat/
+│   ├── heartbeat.py               # heartbeatスクリプト
+│   ├── heartbeat.service          # systemd service定義
+│   └── heartbeat.timer            # systemd timer定義
+├── pir-watcher/
+│   ├── pir-watcher.py             # 人感センサー監視
+│   └── pir-watcher.service        # systemd service定義
+├── log-upload/
+│   ├── log-upload.service         # systemd service定義
+│   └── log-upload.timer           # systemd timer定義
+├── sync_device_config/
+│   └── sync_device_config.py      # 設定同期スクリプト
+├── scripts/
+│   └── upload-logs-to-s3.sh       # ログアップロードスクリプト
+├── tools/
+│   ├── anpi-update.sh             # 自動セットアップ・更新
+│   └── migrate-repository.sh      # リポジトリ移行スクリプト
+└── logs/
+    └── pir-watcher.log            # PIRログファイル
 ```
 
 ## 環境変数設定
@@ -381,5 +381,12 @@ sudo /home/anpi/anpi-watch/pi/tools/anpi-update.sh
 - [heartbeat 詳細](heartbeat/README.md)
 - [sync_device_config 詳細](sync_device_config/README.md)
 - [ログ管理システム](LOGGING.md)
-- [アーキテクチャ全体像](../docs/ARCHITECTURE.md)
-- [セットアップガイド](../docs/SETUP.md)
+
+## 関連リポジトリ
+
+- **[anpi-watch-infra](https://github.com/yourusername/anpi-watch-infra)** - AWSインフラ・管理スクリプト・ドキュメント
+- **[anpi-watch](https://github.com/yourusername/anpi-watch)** - 旧統合リポジトリ（アーカイブ）
+
+## ライセンス
+
+内部使用のため非公開

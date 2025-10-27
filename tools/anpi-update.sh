@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # set -euo pipefail
 
-REPO=/home/anpi/anpi-watch
+REPO=/home/anpi/anpi-watch-pi
 
 cd "$REPO"
 
@@ -11,12 +11,11 @@ cd "$REPO"
 # 更新（main ブランチ想定）
 git fetch --prune
 git reset --hard origin/main
-git submodule update --init --recursive
 
 if [ ! -f /etc/systemd/system/pir-watcher.service ]; then
   echo "Setting up pir-watcher daemon..."
-  sudo ln -s ~/anpi-watch/pi/pir-watcher/pir-watcher.py      /usr/local/bin/pir-watcher.py
-  sudo ln -s ~/anpi-watch/pi/pir-watcher/pir-watcher.service /etc/systemd/system/pir-watcher.service
+  sudo ln -s ~/anpi-watch-pi/pir-watcher/pir-watcher.py      /usr/local/bin/pir-watcher.py
+  sudo ln -s ~/anpi-watch-pi/pir-watcher/pir-watcher.service /etc/systemd/system/pir-watcher.service
   sudo systemctl daemon-reload
   sudo systemctl enable --now pir-watcher.service
   echo "pir-watcher daemon setup completed."
@@ -24,9 +23,9 @@ fi
 
 if [ ! -f /etc/systemd/system/heartbeat.timer ]; then
   echo "Setting up heartbeat daemon..."
-  sudo ln -s ~/anpi-watch/pi/heartbeat/heartbeat.py      /usr/local/bin/heartbeat.py
-  sudo ln -s ~/anpi-watch/pi/heartbeat/heartbeat.service /etc/systemd/system/heartbeat.service
-  sudo ln -s ~/anpi-watch/pi/heartbeat/heartbeat.timer   /etc/systemd/system/heartbeat.timer
+  sudo ln -s ~/anpi-watch-pi/heartbeat/heartbeat.py      /usr/local/bin/heartbeat.py
+  sudo ln -s ~/anpi-watch-pi/heartbeat/heartbeat.service /etc/systemd/system/heartbeat.service
+  sudo ln -s ~/anpi-watch-pi/heartbeat/heartbeat.timer   /etc/systemd/system/heartbeat.timer
   sudo systemctl daemon-reload
   sudo systemctl enable --now heartbeat.service
   sudo systemctl enable --now heartbeat.timer
@@ -35,9 +34,9 @@ fi
 
 if [ ! -f /etc/systemd/system/anpi-update.timer ]; then
   echo "Setting up deploy automation daemon..."
-  sudo ln -s ~/anpi-watch/pi/tools/anpi-update.sh      /usr/local/bin/anpi-update.sh
-  sudo ln -s ~/anpi-watch/pi/tools/anpi-update.service /etc/systemd/system/anpi-update.service
-  sudo ln -s ~/anpi-watch/pi/tools/anpi-update.timer   /etc/systemd/system/anpi-update.timer
+  sudo ln -s ~/anpi-watch-pi/tools/anpi-update.sh      /usr/local/bin/anpi-update.sh
+  sudo ln -s ~/anpi-watch-pi/tools/anpi-update.service /etc/systemd/system/anpi-update.service
+  sudo ln -s ~/anpi-watch-pi/tools/anpi-update.timer   /etc/systemd/system/anpi-update.timer
   sudo systemctl daemon-reload
   # sudo systemctl enable --now anpi-update.service
   sudo systemctl enable --now anpi-update.timer
@@ -61,7 +60,7 @@ sudo /bin/systemctl restart pir-watcher.service
 # デバイス同期デーモンの初期設定（初回のみ）
 if [ ! -f /etc/systemd/system/sync_device_config.timer ]; then
   echo "Setting up device sync daemon..."
-  bash ~/anpi-watch/pi/sync_device_config/install.sh
+  bash ~/anpi-watch-pi/sync_device_config/install.sh
 fi
 
 # ログ管理の初期設定（初回のみ）
@@ -69,19 +68,19 @@ if [ ! -f /etc/systemd/system/log-upload.timer ]; then
   echo "Setting up log management (S3 + logrotate + systemd timer)..."
 
   # S3アップロードスクリプトのファイルコピー
-  sudo cp "$REPO/pi/scripts/upload-logs-to-s3.sh" /usr/local/bin/upload-logs-to-s3.sh
+  sudo cp "$REPO/scripts/upload-logs-to-s3.sh" /usr/local/bin/upload-logs-to-s3.sh
   sudo chmod +x /usr/local/bin/upload-logs-to-s3.sh
 
   # logrotate設定のコピー
-  sudo cp "$REPO/pi/config/logrotate-anpi-watcher" /etc/logrotate.d/anpi-watcher
+  sudo cp "$REPO/config/logrotate-anpi-watcher" /etc/logrotate.d/anpi-watcher
 
   # ログディレクトリの作成
   mkdir -p "$REPO/logs"
   chmod 755 "$REPO/logs"
 
   # systemd timer + service のファイルコピー
-  sudo cp "$REPO/pi/log-upload/log-upload.service" /etc/systemd/system/log-upload.service
-  sudo cp "$REPO/pi/log-upload/log-upload.timer" /etc/systemd/system/log-upload.timer
+  sudo cp "$REPO/log-upload/log-upload.service" /etc/systemd/system/log-upload.service
+  sudo cp "$REPO/log-upload/log-upload.timer" /etc/systemd/system/log-upload.timer
   sudo systemctl daemon-reload
   sudo systemctl enable --now log-upload.timer
   # sudo systemctl start log-upload.timer
