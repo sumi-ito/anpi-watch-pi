@@ -17,7 +17,7 @@ echo -e "${BLUE}========================================${NC}\n"
 # ========================================
 # Step 0: 既存設定の確認と読み込み
 # ========================================
-CONFIG_FILE="/home/anpi/anpi-watch/pi/config.env"
+CONFIG_FILE="/home/anpi/anpi-watch-pi/config.env"
 SKIP_INPUT=false
 
 if [ -f "$CONFIG_FILE" ]; then
@@ -224,7 +224,7 @@ echo -e "\n${YELLOW}⚙️  Step 5: config.env の作成${NC}\n"
 sudo mkdir -p /etc/pir-monitor/
 
 # config.env作成
-cat > ~/anpi-watch/pi/config.env <<EOF
+cat > ~/anpi-watch-pi/config.env <<EOF
 # Device Configuration
 DEVICE_ID="${DEVICE_ID}"
 S3_BUCKET="${S3_BUCKET}"
@@ -238,7 +238,7 @@ EOF
 
 # config.envを配置（既存のシンボリックリンクがあれば削除）
 sudo rm -f /etc/pir-monitor/config.env
-sudo ln -s ~/anpi-watch/pi/config.env /etc/pir-monitor/config.env
+sudo ln -s ~/anpi-watch-pi/config.env /etc/pir-monitor/config.env
 
 echo -e "${GREEN}✓ config.env を作成しました${NC}\n"
 
@@ -307,20 +307,20 @@ cd ~/anpi-watch
 
 # pir-watcher
 echo "Setting up pir-watcher..."
-sudo ln -sf ~/anpi-watch/pi/pir-watcher/pir-watcher.py      /usr/local/bin/pir-watcher.py
-sudo ln -sf ~/anpi-watch/pi/pir-watcher/pir-watcher.service /etc/systemd/system/pir-watcher.service
+sudo ln -sf ~/anpi-watch-pi/pir-watcher/pir-watcher.py      /usr/local/bin/pir-watcher.py
+sudo ln -sf ~/anpi-watch-pi/pir-watcher/pir-watcher.service /etc/systemd/system/pir-watcher.service
 
 # heartbeat
 echo "Setting up heartbeat..."
-sudo ln -sf ~/anpi-watch/pi/heartbeat/heartbeat.py      /usr/local/bin/heartbeat.py
-sudo ln -sf ~/anpi-watch/pi/heartbeat/heartbeat.service /etc/systemd/system/heartbeat.service
-sudo ln -sf ~/anpi-watch/pi/heartbeat/heartbeat.timer   /etc/systemd/system/heartbeat.timer
+sudo ln -sf ~/anpi-watch-pi/heartbeat/heartbeat.py      /usr/local/bin/heartbeat.py
+sudo ln -sf ~/anpi-watch-pi/heartbeat/heartbeat.service /etc/systemd/system/heartbeat.service
+sudo ln -sf ~/anpi-watch-pi/heartbeat/heartbeat.timer   /etc/systemd/system/heartbeat.timer
 
 # anpi-update (自動デプロイ)
 echo "Setting up anpi-update..."
-sudo ln -sf ~/anpi-watch/pi/tools/anpi-update.sh      /usr/local/bin/anpi-update.sh
-sudo ln -sf ~/anpi-watch/pi/tools/anpi-update.service /etc/systemd/system/anpi-update.service
-sudo ln -sf ~/anpi-watch/pi/tools/anpi-update.timer   /etc/systemd/system/anpi-update.timer
+sudo ln -sf ~/anpi-watch-pi/tools/anpi-update.sh      /usr/local/bin/anpi-update.sh
+sudo ln -sf ~/anpi-watch-pi/tools/anpi-update.service /etc/systemd/system/anpi-update.service
+sudo ln -sf ~/anpi-watch-pi/tools/anpi-update.timer   /etc/systemd/system/anpi-update.timer
 
 # systemd reload
 echo "Reloading systemd..."
@@ -342,7 +342,7 @@ if [ ! -f /etc/systemd/system/sync_device_config.timer ]; then
     read -p "> " SETUP_SYNC
     if [ "$SETUP_SYNC" = "y" ]; then
         echo "Setting up device sync daemon..."
-        bash ~/anpi-watch/pi/sync_device_config/install.sh
+        bash ~/anpi-watch-pi/sync_device_config/install.sh
     fi
 fi
 

@@ -18,7 +18,7 @@ TMP_DIR = "/tmp/pir"
 os.makedirs(TMP_DIR, exist_ok=True)
 
 # ログ設定
-LOG_DIR = "/home/anpi/anpi-watch/logs"
+LOG_DIR = "/home/anpi/anpi-watch-pi/logs"
 os.makedirs(LOG_DIR, exist_ok=True)
 
 def setup_logging():

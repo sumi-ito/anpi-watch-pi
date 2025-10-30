@@ -20,8 +20,8 @@ graph TB
     end
 
     subgraph "Storage"
-        LOCAL[anpi-watch/logs/<br/>pir-watcher.log]
-        CONFIG[anpi-watch/pi/config/<br/>local_device_config.json]
+        LOCAL[anpi-watch-pi/logs/<br/>pir-watcher.log]
+        CONFIG[anpi-watch-pi/config/<br/>local_device_config.json]
     end
 
     subgraph "AWS S3"
@@ -172,7 +172,7 @@ AWS_SECRET_ACCESS_KEY=...
 
 ```bash
 # anpi-update.shで一括セットアップ
-sudo /home/anpi/anpi-watch/pi/tools/anpi-update.sh
+sudo /home/anpi/anpi-watch-pi/tools/anpi-update.sh
 ```
 
 以下が自動実行されます:
@@ -210,7 +210,7 @@ sudo journalctl -u log-upload.service -n 50
 
 ```bash
 # PIR ログ
-tail -f /home/anpi/anpi-watch/logs/pir-watcher.log
+tail -f /home/anpi/anpi-watch-pi/logs/pir-watcher.log
 
 # 設定同期ログ
 sudo journalctl -u sync_device_config.service -f
@@ -270,7 +270,7 @@ gpio readall  # WiringPi必要
 sudo journalctl -u pir-watcher.service -n 100
 
 # 3. 手動実行テスト
-cd /home/anpi/anpi-watch/pi/pir-watcher
+cd /home/anpi/anpi-watch-pi/pir-watcher
 source /etc/pir-monitor/config.env
 python3 pir-watcher.py  # Ctrl+Cで終了
 ```
@@ -370,9 +370,9 @@ sudo systemctl list-timers anpi-update.timer
 ### 手動アップデート
 
 ```bash
-cd /home/anpi/anpi-watch
+cd /home/anpi/anpi-watch-pi
 git pull origin main
-sudo /home/anpi/anpi-watch/pi/tools/anpi-update.sh
+sudo /home/anpi/anpi-watch-pi/tools/anpi-update.sh
 ```
 
 ## 関連ドキュメント

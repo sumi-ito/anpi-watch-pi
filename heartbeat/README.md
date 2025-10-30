@@ -91,7 +91,7 @@ sudo systemctl cat heartbeat.service | grep Environment
 
 # 手動実行
 source /etc/pir-monitor/config.env
-cd /home/anpi/anpi-watch/pi/heartbeat
+cd /home/anpi/anpi-watch-pi/heartbeat
 python3 heartbeat.py
 ```
 

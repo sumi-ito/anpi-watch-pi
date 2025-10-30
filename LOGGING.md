@@ -7,7 +7,7 @@ S3 + Athena によるログ管理システムのセットアップガイド
 ```
 Raspberry Pi (Zero/Zero2)
   └─ pir-test.py (ログ出力)
-      └─ /home/anpi/anpi-watch/logs/pir-watcher.log
+      └─ /home/anpi/anpi-watch-pi/logs/pir-watcher.log
           └─ logrotate (日次ローテーション、午前0時)
               └─ *.log.gz (圧縮済みログ)
                   └─ systemd timer (log-upload.timer、午前3時)
@@ -33,7 +33,7 @@ Raspberry Pi (Zero/Zero2)
 - `/etc/logrotate.d/anpi-watcher` - logrotate設定
 - `/etc/systemd/system/log-upload.service` - S3アップロードサービス
 - `/etc/systemd/system/log-upload.timer` - 日次実行タイマー（午前3時）
-- `/home/anpi/anpi-watch/logs/` - ログディレクトリ
+- `/home/anpi/anpi-watch-pi/logs/` - ログディレクトリ
 
 ### 手動セットアップ
 
@@ -55,7 +55,7 @@ sudo systemctl enable log-upload.timer
 sudo systemctl start log-upload.timer
 
 # ログディレクトリの作成
-mkdir -p /home/anpi/anpi-watch/logs
+mkdir -p /home/anpi/anpi-watch-pi/logs
 ```
 
 ### 環境変数の設定

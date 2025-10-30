@@ -1,4 +1,4 @@
-/home/anpi/anpi-watch/logs/*.log {
+/home/anpi/anpi-watch-pi/logs/*.log {
     daily
     rotate 7
     missingok

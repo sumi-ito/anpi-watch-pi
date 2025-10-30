@@ -47,7 +47,7 @@ if score >= THRESHOLD:
 
 ### ログ管理
 
-- **ファイル**: `/home/anpi/anpi-watch/logs/pir-watcher.log`
+- **ファイル**: `/home/anpi/anpi-watch-pi/logs/pir-watcher.log`
 - **ローテーション**: logrotate (日次、7日保持、gzip圧縮)
 - **S3アップロード**: log-upload.timer (日次3時)
 
@@ -86,7 +86,7 @@ gpio readall  # WiringPi必要
 
 # サービス停止して手動実行
 sudo systemctl stop pir-watcher.service
-cd /home/anpi/anpi-watch/pi/pir-watcher
+cd /home/anpi/anpi-watch-pi/pir-watcher
 source /etc/pir-monitor/config.env
 python3 pir-watcher.py
 

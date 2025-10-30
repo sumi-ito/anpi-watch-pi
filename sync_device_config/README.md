@@ -6,7 +6,7 @@ S3からデバイス設定を定期的に同期し、サービスの有効/無�
 
 - **実行方式**: systemd timer (日次)
 - **機能**: S3設定ダウンロード、ローカル保存、サービス状態反映
-- **設定ファイル**: `/home/anpi/anpi-watch/pi/config/local_device_config.json`
+- **設定ファイル**: `/home/anpi/anpi-watch-pi/config/local_device_config.json`
 
 ## 動作フロー
 
@@ -45,8 +45,8 @@ sequenceDiagram
 
 ### ローカル保存先
 
-- **設定**: `/home/anpi/anpi-watch/pi/config/local_device_config.json`
-- **ステータス**: `/home/anpi/anpi-watch/pi/config/runtime_status.json`
+- **設定**: `/home/anpi/anpi-watch-pi/config/local_device_config.json`
+- **ステータス**: `/home/anpi/anpi-watch-pi/config/runtime_status.json`
 
 ## セットアップ
 
@@ -79,7 +79,7 @@ sudo journalctl -u sync_device_config.service -n 20
 
 # 出力例:
 # Downloaded config for ito-raspi-01
-# Saved local config to /home/anpi/anpi-watch/pi/config/local_device_config.json
+# Saved local config to /home/anpi/anpi-watch-pi/config/local_device_config.json
 # Device is enabled and not expired
 ```
 
@@ -87,11 +87,11 @@ sudo journalctl -u sync_device_config.service -n 20
 
 設定に基づいて自動的にサービスを制御:
 
-| 条件 | 動作 |
-|------|------|
+| 条件                           | 動作         |
+| ------------------------------ | ------------ |
 | `enabled: true` かつ有効期限内 | サービス起動 |
-| `enabled: false` | サービス停止 |
-| 有効期限切れ | サービス停止 |
+| `enabled: false`               | サービス停止 |
+| 有効期限切れ                   | サービス停止 |
 
 ### 手動サービス管理
 
@@ -131,7 +131,7 @@ aws s3 ls s3://${S3_BUCKET}/config/devices/
 
 ```bash
 # runtime_status.json確認
-cat /home/anpi/anpi-watch/pi/config/runtime_status.json
+cat /home/anpi/anpi-watch-pi/config/runtime_status.json
 
 # 手動でサービス更新
 python3 /home/anpi/anpi-watch/scripts/device_status_manager.py --update

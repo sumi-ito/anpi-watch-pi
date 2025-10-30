@@ -1,7 +1,7 @@
 # デバイス設定の同期
-sudo ln -s ~/anpi-watch/pi/sync_device_config/sync_device_config.py      /usr/local/bin/sync_device_config.py
-sudo ln -s ~/anpi-watch/pi/sync_device_config/sync_device_config.service /etc/systemd/system/sync_device_config.service
-sudo ln -s ~/anpi-watch/pi/sync_device_config/sync_device_config.timer   /etc/systemd/system/sync_device_config.timer
+sudo ln -s ~/anpi-watch-pi/sync_device_config/sync_device_config.py      /usr/local/bin/sync_device_config.py
+sudo ln -s ~/anpi-watch-pi/sync_device_config/sync_device_config.service /etc/systemd/system/sync_device_config.service
+sudo ln -s ~/anpi-watch-pi/sync_device_config/sync_device_config.timer   /etc/systemd/system/sync_device_config.timer
 sudo systemctl daemon-reload
 sudo systemctl enable --now sync_device_config.service
 sudo systemctl enable --now sync_device_config.timer

@@ -16,7 +16,7 @@ S3_BUCKET = os.environ.get("S3_BUCKET", "your-s3-bucket")
 REGION    = os.environ.get("REGION", "ap-northeast-1")
 
 class DeviceConfigSyncer:
-    def __init__(self, bucket_name: str, config_dir: str = '/home/anpi/anpi-watch/pi/config', region: str = 'ap-northeast-1'):
+    def __init__(self, bucket_name: str, config_dir: str = '/home/anpi/anpi-watch-pi/config', region: str = 'ap-northeast-1'):
         self.bucket_name = bucket_name
         self.config_dir = config_dir
         self.region = region
@@ -205,7 +205,7 @@ def main():
     parser = argparse.ArgumentParser(description='Sync device configuration from S3')
     # parser.add_argument('--bucket', required=True, help='S3 bucket name')
     # parser.add_argument('--region', default='ap-northeast-1', help='AWS region (default: ap-northeast-1)')
-    parser.add_argument('--config-dir', default='/home/anpi/anpi-watch/pi/config',
+    parser.add_argument('--config-dir', default='/home/anpi/anpi-watch-pi/config',
                         help='Local config directory path')
     parser.add_argument('--check-only', action='store_true',
                         help='Only check current status without syncing')

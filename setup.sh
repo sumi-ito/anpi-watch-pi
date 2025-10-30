@@ -32,18 +32,18 @@ ssh -T github-anpi
 # アプリケーションのセットアップ
 cd ~
 git clone github-anpi:sumi-ito/anpi-watch.git
-cd anpi-watch/
+cd anpi-watch-pi/
 cp pi/config.env.example pi/config.env
 # 1. device_id, s3_bucket を設定
 #   注意: 新規でIAMユーザーを作成し、アクセスキーを発行しておく
 # 2. S3のバケットポリシーへ追加する
 vi pi/config.env
 # リンクを張る
-sudo ln -s ~/anpi-watch/pi/config.env /etc/pir-monitor/config.env
+sudo ln -s ~/anpi-watch-pi/config.env /etc/pir-monitor/config.env
 
 # pir-watcherの設定
-# sudo ln -s ~/anpi-watch/pi/pir-watcher/pir-watcher.py      /usr/local/bin/pir-watcher.py
-# sudo ln -s ~/anpi-watch/pi/pir-watcher/pir-watcher.service /etc/systemd/system/pir-watcher.service
+# sudo ln -s ~/anpi-watch-pi/pir-watcher/pir-watcher.py      /usr/local/bin/pir-watcher.py
+# sudo ln -s ~/anpi-watch-pi/pir-watcher/pir-watcher.service /etc/systemd/system/pir-watcher.service
 # sudo systemctl daemon-reload
 # sudo systemctl enable --now pir-watcher.service
 # sudo systemctl status pir-watcher.service
@@ -52,9 +52,9 @@ sudo ln -s ~/anpi-watch/pi/config.env /etc/pir-monitor/config.env
 # sudo systemctl restart pir-watcher.service
 
 # heartbeatの設定
-# sudo ln -s ~/anpi-watch/pi/heartbeat/heartbeat.py      /usr/local/bin/heartbeat.py
-# sudo ln -s ~/anpi-watch/pi/heartbeat/heartbeat.service /etc/systemd/system/heartbeat.service
-# sudo ln -s ~/anpi-watch/pi/heartbeat/heartbeat.timer   /etc/systemd/system/heartbeat.timer
+# sudo ln -s ~/anpi-watch-pi/heartbeat/heartbeat.py      /usr/local/bin/heartbeat.py
+# sudo ln -s ~/anpi-watch-pi/heartbeat/heartbeat.service /etc/systemd/system/heartbeat.service
+# sudo ln -s ~/anpi-watch-pi/heartbeat/heartbeat.timer   /etc/systemd/system/heartbeat.timer
 # sudo systemctl daemon-reload
 # sudo systemctl enable --now heartbeat.service
 # sudo systemctl enable --now heartbeat.timer
@@ -65,9 +65,9 @@ sudo ln -s ~/anpi-watch/pi/config.env /etc/pir-monitor/config.env
 # sudo systemctl restart heartbeat.service
 
 # 自動デプロイの設定
-# sudo ln -s ~/anpi-watch/pi/tools/anpi-update.sh      /usr/local/bin/anpi-update.sh
-# sudo ln -s ~/anpi-watch/pi/tools/anpi-update.service /etc/systemd/system/anpi-update.service
-# sudo ln -s ~/anpi-watch/pi/tools/anpi-update.timer   /etc/systemd/system/anpi-update.timer
+# sudo ln -s ~/anpi-watch-pi/tools/anpi-update.sh      /usr/local/bin/anpi-update.sh
+# sudo ln -s ~/anpi-watch-pi/tools/anpi-update.service /etc/systemd/system/anpi-update.service
+# sudo ln -s ~/anpi-watch-pi/tools/anpi-update.timer   /etc/systemd/system/anpi-update.timer
 # sudo systemctl daemon-reload
 # sudo systemctl enable --now anpi-update.service
 # sudo systemctl enable --now anpi-update.timer
@@ -81,7 +81,7 @@ sudo ln -s ~/anpi-watch/pi/config.env /etc/pir-monitor/config.env
 # デバイス同期デーモンの初期設定（初回のみ）
 # if [ ! -f /etc/systemd/system/sync_device_config.timer ]; then
 #   echo "Setting up device sync daemon..."
-#   bash ~/anpi-watch/pi/sync_device_config/install.sh
+#   bash ~/anpi-watch-pi/sync_device_config/install.sh
 # fi
 
 sudo reboot

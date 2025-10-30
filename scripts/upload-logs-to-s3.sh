@@ -9,7 +9,7 @@ if [ -f /etc/pir-monitor/config.env ]; then
     set -u
 fi
 
-LOG_DIR="/home/anpi/anpi-watch/logs"
+LOG_DIR="/home/anpi/anpi-watch-pi/logs"
 S3_BUCKET="${S3_BUCKET:-your-s3-bucket}"
 REGION="${REGION:-ap-northeast-1}"
 DEVICE_ID="${DEVICE_ID:-$(hostname)}"
