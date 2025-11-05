@@ -74,21 +74,18 @@ SENSITIVITY_PRESETS = {
             "LEAK_PER_SEC": 1,
             "INC_PER_EVENT": 25,   # BUFFER_SEC * 5
             "THRESHOLD": 50,       # BUFFER_SEC * 10
-            "CLEAR_THRESHOLD": 30, # THRESHOLD * .6
             "BUFFER_SEC": 5,
         },
         "medium": {
             "LEAK_PER_SEC": 1,
             "INC_PER_EVENT": 20,   # BUFFER_SEC * 4
             "THRESHOLD": 60,       # BUFFER_SEC * 12
-            "CLEAR_THRESHOLD": 36, # THRESHOLD * .6
             "BUFFER_SEC": 5,
         },
         "low": {
             "LEAK_PER_SEC": 1,
             "INC_PER_EVENT": 15,   # BUFFER_SEC * 3
             "THRESHOLD": 60,       # BUFFER_SEC * 12
-            "CLEAR_THRESHOLD": 36, # THRESHOLD * .6
             "BUFFER_SEC": 5,
         },
     },
@@ -97,21 +94,18 @@ SENSITIVITY_PRESETS = {
             "LEAK_PER_SEC": 1,
             "INC_PER_EVENT": 24,   # BUFFER_SEC * 6
             "THRESHOLD": 32,       # BUFFER_SEC * 8
-            "CLEAR_THRESHOLD": 42, # THRESHOLD * .6
             "BUFFER_SEC": 4,
         },
         "medium": {
             "LEAK_PER_SEC": 1,
             "INC_PER_EVENT": 20,   # BUFFER_SEC * 5
             "THRESHOLD": 36,       # BUFFER_SEC * 9
-            "CLEAR_THRESHOLD": 21, # THRESHOLD * .6
             "BUFFER_SEC": 4,
         },
         "low": {
             "LEAK_PER_SEC": 1,
             "INC_PER_EVENT": 16,   # BUFFER_SEC * 4
             "THRESHOLD": 40,       # BUFFER_SEC * 10
-            "CLEAR_THRESHOLD": 21, # THRESHOLD * .6
             "BUFFER_SEC": 4,
         },
     },
@@ -134,11 +128,10 @@ def get_param(param_name, default_value):
 
     return default_value
 
-# "リーキーバケット"のパラメータ
+# "リーキーバケット"のパラメータ（スロットリセット方式）
 LEAK_PER_SEC    = get_param("LEAK_PER_SEC", 1)      # 1秒毎の減衰量
 INC_PER_EVENT   = get_param("INC_PER_EVENT", 20)    # 立ち上がり1回の加点
 THRESHOLD       = get_param("THRESHOLD", 60)        # これ以上で確定
-CLEAR_THRESHOLD = get_param("CLEAR_THRESHOLD", 36)  # 解除域（ヒステリシス）
 BUFFER_SEC      = get_param("BUFFER_SEC", 5)        # 1回検知後の"最近動いた"判定バッファ
 MAX_SCORE       = THRESHOLD * 2                      # スコアの上限（閾値の2倍）
 # ==================
@@ -147,6 +140,7 @@ lock = threading.Lock()
 score = 0
 detected = False
 last_detected = None
+current_slot = None
 
 def get_version():
     try:
@@ -199,12 +193,13 @@ def motion_callback(channel):
 
 
 def main():
-    global score, detected
+    global score, detected, current_slot
 
     # 起動時パラメータ表示
     logger.info("=== PIR Watcher Started ===")
     logger.info(f"version={VERSION} device_model={DEVICE_MODEL} sensitivity={SENSITIVITY}")
-    logger.info(f"params: LEAK_PER_SEC={LEAK_PER_SEC} INC_PER_EVENT={INC_PER_EVENT} THRESHOLD={THRESHOLD} CLEAR_THRESHOLD={CLEAR_THRESHOLD} BUFFER_SEC={BUFFER_SEC} MAX_SCORE={MAX_SCORE}")
+    logger.info(f"params: LEAK_PER_SEC={LEAK_PER_SEC} INC_PER_EVENT={INC_PER_EVENT} THRESHOLD={THRESHOLD} BUFFER_SEC={BUFFER_SEC} MAX_SCORE={MAX_SCORE}")
+    logger.info(f"slot_interval={SLOT_MIN}min")
     logger.info("===========================")
 
     GPIO.setmode(GPIO.BCM)
@@ -216,27 +211,37 @@ def main():
     try:
         while True:
             now = datetime.now(JST)
+            slot = current_slot_key(now)
+
             with lock:
+                # スロット切り替わり検知 → 状態リセット
+                if slot != current_slot:
+                    old_slot = current_slot
+                    old_score = score
+                    old_detected = detected
+                    current_slot = slot
+                    score = 0
+                    detected = False
+                    if old_slot is not None:  # 初回起動時はログ出力しない
+                        logger.info(f"{DEVICE_MODEL}: SLOT_RESET old_slot={old_slot} new_slot={slot} old_score={old_score} old_detected={old_detected}")
+                    else:
+                        logger.info(f"{DEVICE_MODEL}: SLOT_INIT slot={slot}")
+
                 # 1秒ごとにリーク（0未満は禁止）
                 if score > 0:
                     score = max(0, score - LEAK_PER_SEC)
 
-                # ヒステリシスつきの確定/解除
+                # 閾値到達で確定（CLEARロジック削除、スロットリセットで自動解除）
                 if not detected and score >= THRESHOLD:
                     detected = True
-                    logger.info(f"{DEVICE_MODEL}: event=CONFIRMED score={score} threshold={THRESHOLD}")
-                    now = datetime.now(JST)
-                    slot = current_slot_key(now)
+                    logger.info(f"{DEVICE_MODEL}: event=CONFIRMED slot={current_slot} score={score} threshold={THRESHOLD}")
                     local_flag = os.path.join(TMP_DIR, f"motion-{slot}")
                     put_s3_if_new(local_flag, slot)
-                elif detected and score < CLEAR_THRESHOLD:
-                    detected = False
-                    logger.info(f"{DEVICE_MODEL}: event=CLEARED score={score} clear_threshold={CLEAR_THRESHOLD}")
 
                 # 直近5秒以内の"最近動いた"ステータス（観測用）
                 recent = 1 if (last_detected and (now - last_detected).total_seconds() < BUFFER_SEC) else 0
 
-                logger.info(f"{DEVICE_MODEL}: score={score} recent={recent} detected={int(detected)}")
+                logger.info(f"{DEVICE_MODEL}: slot={current_slot} score={score} recent={recent} detected={int(detected)}")
 
             time.sleep(1)
     finally:
