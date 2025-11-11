@@ -90,15 +90,9 @@ fi
 
 # FIXME: 移行が完了すれば不要なので消してください
 # リポジトリ移行対応: 2025年11月未満の古いupload-logs-to-s3.shを更新
-if [ -f /usr/local/bin/upload-logs-to-s3.sh ]; then
-  file_mtime=$(stat -c %Y /usr/local/bin/upload-logs-to-s3.sh 2>/dev/null || stat -f %m /usr/local/bin/upload-logs-to-s3.sh)
-  nov_2025_timestamp=1730383200  # 2025-11-01 00:00:00 UTC
-  if [ "$file_mtime" -lt "$nov_2025_timestamp" ]; then
-    echo "Updating upload-logs-to-s3.sh (old version detected from repository migration)"
-    sudo cp "$REPO/scripts/upload-logs-to-s3.sh" /usr/local/bin/upload-logs-to-s3.sh
-    sudo chmod +x /usr/local/bin/upload-logs-to-s3.sh
-  fi
-fi
+echo "Updating upload-logs-to-s3.sh (old version detected from repository migration)"
+sudo cp "$REPO/scripts/upload-logs-to-s3.sh" /usr/local/bin/upload-logs-to-s3.sh
+sudo chmod +x /usr/local/bin/upload-logs-to-s3.sh
 
 CURRENT_HOUR=$(date +%H)
 if [ "$CURRENT_HOUR" = "06" ]; then
