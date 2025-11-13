@@ -2,7 +2,7 @@
 
 Raspberry Pi + 人感センサーを用いた安否監視システムのデバイス側コンポーネント
 
-このリポジトリは [anpi-watch](https://github.com/yourusername/anpi-watch) から分離されたRaspberry Pi専用リポジトリです。
+このリポジトリは [anpi-watch](https://github.com/sumi-ito/anpi-watch) から分離されたRaspberry Pi専用リポジトリです。
 
 ## 構成
 
@@ -33,7 +33,7 @@ graph TB
     LOCAL -->|logrotate<br/>日次圧縮| LOG
     LOG -->|午前3時| S3
 
-    HB -->|10分毎| S3
+    HB -->|15分毎| S3
     PIRW -->|検知時| S3
     SYNC -->|日次| S3
     S3 -->|設定DL| CONFIG
@@ -170,9 +170,13 @@ AWS_SECRET_ACCESS_KEY=...
 
 ### 自動セットアップ (推奨)
 
+リポジトリ移行後は動作未確認なので、修正しつつの実行になりそう。
+
 ```bash
-# anpi-update.shで一括セットアップ
-sudo /home/anpi/anpi-watch-pi/tools/anpi-update.sh
+scp ./setup_auto.sh anpi@192.168.3.102:~/
+sh ./setup_auto.sh
+# 設定後
+rm ./setup_auto.sh
 ```
 
 以下が自動実行されます:
@@ -181,10 +185,6 @@ sudo /home/anpi/anpi-watch-pi/tools/anpi-update.sh
 - logrotate設定
 - ログディレクトリ作成
 - スクリプトの配置
-
-### 手動セットアップ
-
-詳細は [セットアップガイド](../docs/SETUP.md#raspberry-piのセットアップ) を参照してください。
 
 ## 監視とログ
 
@@ -371,8 +371,8 @@ sudo systemctl list-timers anpi-update.timer
 
 ```bash
 cd /home/anpi/anpi-watch-pi
-git pull origin main
-sudo /home/anpi/anpi-watch-pi/tools/anpi-update.sh
+# anpi-update に更新がある場合は2回実行する
+sudo systemctl start anpi-update.service
 ```
 
 ## 関連ドキュメント

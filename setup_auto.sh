@@ -148,48 +148,48 @@ mkdir -p ~/.ssh
 chmod 700 ~/.ssh
 
 # SSH鍵生成（既存の鍵がない場合のみ）
-if [ ! -f ~/.ssh/id_ed25519_github ]; then
-    echo "Generating SSH key..."
-    ssh-keygen -t ed25519 -C "raspi-anpi-watch" -f ~/.ssh/id_ed25519_github -N ""
-    echo -e "${GREEN}✓ SSH鍵を生成しました${NC}\n"
-else
-    echo -e "${YELLOW}⚠️  SSH鍵は既に存在します${NC}\n"
-fi
+# if [ ! -f ~/.ssh/id_ed25519_github ]; then
+#     echo "Generating SSH key..."
+#     ssh-keygen -t ed25519 -C "raspi-anpi-watch" -f ~/.ssh/id_ed25519_github -N ""
+#     echo -e "${GREEN}✓ SSH鍵を生成しました${NC}\n"
+# else
+#     echo -e "${YELLOW}⚠️  SSH鍵は既に存在します${NC}\n"
+# fi
 
-# SSH configファイルの作成
-echo "Creating SSH config..."
-cat > ~/.ssh/config <<EOF
-Host github-anpi
-    HostName github.com
-    User git
-    IdentityFile ~/.ssh/id_ed25519_github
-    IdentitiesOnly yes
-EOF
+# # SSH configファイルの作成
+# echo "Creating SSH config..."
+# cat > ~/.ssh/config <<EOF
+# Host github-anpi
+#     HostName github.com
+#     User git
+#     IdentityFile ~/.ssh/id_ed25519_github
+#     IdentitiesOnly yes
+# EOF
 
-chmod 600 ~/.ssh/config
-echo -e "${GREEN}✓ SSH config を作成しました${NC}\n"
+# chmod 600 ~/.ssh/config
+# echo -e "${GREEN}✓ SSH config を作成しました${NC}\n"
 
-# 公開鍵を表示
-echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}  GitHub Deploy Key 登録手順${NC}"
-echo -e "${BLUE}========================================${NC}\n"
-echo "以下の公開鍵をGitHubのDeploy Keyに登録してください:"
-echo ""
-cat ~/.ssh/id_ed25519_github.pub
-echo ""
-echo -e "${YELLOW}登録URL: https://github.com/sumi-ito/anpi-watch/settings/keys/new${NC}"
-echo ""
-read -p "Deploy Keyの登録が完了したらEnterキーを押してください..."
+# # 公開鍵を表示
+# echo -e "${BLUE}========================================${NC}"
+# echo -e "${BLUE}  GitHub Deploy Key 登録手順${NC}"
+# echo -e "${BLUE}========================================${NC}\n"
+# echo "以下の公開鍵をGitHubのDeploy Keyに登録してください:"
+# echo ""
+# cat ~/.ssh/id_ed25519_github.pub
+# echo ""
+# echo -e "${YELLOW}登録URL: https://github.com/sumi-ito/anpi-watch/settings/keys/new${NC}"
+# echo ""
+# read -p "Deploy Keyの登録が完了したらEnterキーを押してください..."
 
 # GitHub接続テスト
-echo -e "\n${YELLOW}GitHub接続テスト中...${NC}"
-if ssh -T github-anpi 2>&1 | grep -q "successfully authenticated"; then
-    echo -e "${GREEN}✓ GitHub接続成功${NC}\n"
-else
-    echo -e "${RED}❌ GitHub接続に失敗しました${NC}"
-    echo "Deploy Keyが正しく登録されているか確認してください"
-    exit 1
-fi
+# echo -e "\n${YELLOW}GitHub接続テスト中...${NC}"
+# if ssh -T github-anpi 2>&1 | grep -q "successfully authenticated"; then
+#     echo -e "${GREEN}✓ GitHub接続成功${NC}\n"
+# else
+#     echo -e "${RED}❌ GitHub接続に失敗しました${NC}"
+#     echo "Deploy Keyが正しく登録されているか確認してください"
+#     exit 1
+# fi
 
 # ========================================
 # Step 4: リポジトリのクローン
@@ -203,13 +203,13 @@ if [ -d ~/anpi-watch ]; then
     read -p "既存のディレクトリを削除して再クローンしますか？ (y/n): " RECLONE
     if [ "$RECLONE" = "y" ]; then
         rm -rf ~/anpi-watch
-        git clone github-anpi:sumi-ito/anpi-watch.git
+        git clone https://github.com/sumi-ito/anpi-watch-pi.git
     else
         cd ~/anpi-watch
         git pull
     fi
 else
-    git clone github-anpi:sumi-ito/anpi-watch.git
+    git clone https://github.com/sumi-ito/anpi-watch-pi.git
 fi
 
 cd ~/anpi-watch
