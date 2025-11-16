@@ -1,7 +1,7 @@
 #!/bin/bash
 # Raspberry Pi 自動セットアップスクリプト（anpi-watch）
 # Usage: bash setup_auto.sh
-# scp ./pi/setup_auto.sh anpi@192.168.3.102:~/
+# scp ./setup_auto.sh anpi@192.168.3.102:~/
 
 # 色付きログ用
 RED='\033[0;31m'
@@ -147,50 +147,6 @@ echo -e "\n${YELLOW}🔑 Step 3: GitHub Deploy Key の設定${NC}\n"
 mkdir -p ~/.ssh
 chmod 700 ~/.ssh
 
-# SSH鍵生成（既存の鍵がない場合のみ）
-# if [ ! -f ~/.ssh/id_ed25519_github ]; then
-#     echo "Generating SSH key..."
-#     ssh-keygen -t ed25519 -C "raspi-anpi-watch" -f ~/.ssh/id_ed25519_github -N ""
-#     echo -e "${GREEN}✓ SSH鍵を生成しました${NC}\n"
-# else
-#     echo -e "${YELLOW}⚠️  SSH鍵は既に存在します${NC}\n"
-# fi
-
-# # SSH configファイルの作成
-# echo "Creating SSH config..."
-# cat > ~/.ssh/config <<EOF
-# Host github-anpi
-#     HostName github.com
-#     User git
-#     IdentityFile ~/.ssh/id_ed25519_github
-#     IdentitiesOnly yes
-# EOF
-
-# chmod 600 ~/.ssh/config
-# echo -e "${GREEN}✓ SSH config を作成しました${NC}\n"
-
-# # 公開鍵を表示
-# echo -e "${BLUE}========================================${NC}"
-# echo -e "${BLUE}  GitHub Deploy Key 登録手順${NC}"
-# echo -e "${BLUE}========================================${NC}\n"
-# echo "以下の公開鍵をGitHubのDeploy Keyに登録してください:"
-# echo ""
-# cat ~/.ssh/id_ed25519_github.pub
-# echo ""
-# echo -e "${YELLOW}登録URL: https://github.com/sumi-ito/anpi-watch/settings/keys/new${NC}"
-# echo ""
-# read -p "Deploy Keyの登録が完了したらEnterキーを押してください..."
-
-# GitHub接続テスト
-# echo -e "\n${YELLOW}GitHub接続テスト中...${NC}"
-# if ssh -T github-anpi 2>&1 | grep -q "successfully authenticated"; then
-#     echo -e "${GREEN}✓ GitHub接続成功${NC}\n"
-# else
-#     echo -e "${RED}❌ GitHub接続に失敗しました${NC}"
-#     echo "Deploy Keyが正しく登録されているか確認してください"
-#     exit 1
-# fi
-
 # ========================================
 # Step 4: リポジトリのクローン
 # ========================================
@@ -198,14 +154,14 @@ echo -e "\n${YELLOW}📥 Step 4: リポジトリのクローン${NC}\n"
 
 cd ~
 
-if [ -d ~/anpi-watch ]; then
-    echo -e "${YELLOW}⚠️  anpi-watch ディレクトリは既に存在します${NC}"
+if [ -d ~/anpi-watch-pi ]; then
+    echo -e "${YELLOW}⚠️  anpi-watch-pi ディレクトリは既に存在します${NC}"
     read -p "既存のディレクトリを削除して再クローンしますか？ (y/n): " RECLONE
     if [ "$RECLONE" = "y" ]; then
-        rm -rf ~/anpi-watch
+        rm -rf ~/anpi-watch-pi
         git clone https://github.com/sumi-ito/anpi-watch-pi.git
     else
-        cd ~/anpi-watch
+        cd ~/anpi-watch-pi
         git pull
     fi
 else
@@ -247,21 +203,10 @@ echo -e "${GREEN}✓ config.env を作成しました${NC}\n"
 # ========================================
 echo -e "\n${YELLOW}🔍 Step 6: AWS S3 接続テスト${NC}\n"
 
-# 環境変数を読み込み
+# 環境変数を読み込み（set -a でexportモードを有効化）
+set -a
 source /etc/pir-monitor/config.env
-
-# S3バケット存在確認
-# echo "Checking S3 bucket: ${S3_BUCKET}..."
-# if aws s3 ls "s3://${S3_BUCKET}/devices/${DEVICE_ID}" --region ${REGION} 2>/dev/null; then
-#     echo -e "${GREEN}✓ S3バケットへのアクセス成功${NC}\n"
-# else
-#     echo -e "${RED}❌ S3バケットへのアクセスに失敗しました${NC}"
-#     echo "以下を確認してください:"
-#     echo "  1. バケット名: ${S3_BUCKET}"
-#     echo "  2. AWS認証情報が正しいか"
-#     echo "  3. IAMポリシーでS3アクセス権限があるか"
-#     exit 1
-# fi
+set +a
 
 # テストファイルのPUT
 TEST_KEY="devices/${DEVICE_ID}/test/setup-$(date +%s).txt"
@@ -270,8 +215,6 @@ echo "setup test" | aws s3 cp - "s3://${S3_BUCKET}/${TEST_KEY}" --region ${REGIO
 
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✓ S3への書き込みテスト成功${NC}\n"
-    # テストファイルを削除
-    # aws s3 rm "s3://${S3_BUCKET}/${TEST_KEY}" --region ${REGION} 2>/dev/null
 else
     echo -e "${RED}❌ S3への書き込みに失敗しました${NC}"
     echo "IAMユーザーに以下の権限が必要です:"
@@ -303,7 +246,7 @@ fi
 # ========================================
 echo -e "\n${YELLOW}🔧 Step 7: サービスのセットアップ${NC}\n"
 
-cd ~/anpi-watch
+cd ~/anpi-watch-pi
 
 # pir-watcher
 echo "Setting up pir-watcher..."
