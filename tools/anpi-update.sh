@@ -88,12 +88,6 @@ if [ ! -f /etc/systemd/system/log-upload.timer ]; then
   echo "Log management setup completed."
 fi
 
-# FIXME: 移行が完了すれば不要なので消してください
-# リポジトリ移行対応: 2025年11月未満の古いupload-logs-to-s3.shを更新
-echo "Updating upload-logs-to-s3.sh (old version detected from repository migration)"
-sudo cp "$REPO/scripts/upload-logs-to-s3.sh" /usr/local/bin/upload-logs-to-s3.sh
-sudo chmod +x /usr/local/bin/upload-logs-to-s3.sh
-
 CURRENT_HOUR=$(date +%H)
 if [ "$CURRENT_HOUR" = "06" ]; then
   logger "anpi-watch: Scheduled reboot at 6:00"
