@@ -88,8 +88,9 @@ if [ ! -f /etc/systemd/system/log-upload.timer ]; then
   echo "Log management setup completed."
 fi
 
-CURRENT_HOUR=$(date +%H)
-if [ "$CURRENT_HOUR" = "06" ]; then
-  logger "anpi-watch: Scheduled reboot at 6:00"
-  sudo reboot
-fi
+# NOTE: 定期的に再起動後に不安定になるため無効化
+# CURRENT_HOUR=$(date +%H)
+# if [ "$CURRENT_HOUR" = "06" ]; then
+#   logger "anpi-watch: Scheduled reboot at 6:00"
+#   sudo reboot
+# fi
