@@ -87,7 +87,7 @@
 3. `/home/anpi/anpi-watch-pi/config/last_reboot_requested_at.txt` から前回実行したタイムスタンプを読み込み
 4. 以下の条件を全て満たす場合に再起動実行:
    - `requested_at` が設定されている
-   - 現在時刻が `requested_at` の前後5分以内（時間窓）
+   - 現在時刻が `requested_at` の前後6分以内（時間窓）
    - `requested_at` が前回実行時と異なる（重複実行防止）
 5. 再起動実行前に `last_reboot_requested_at.txt` に `requested_at` を記録
 6. `sudo reboot` 実行
@@ -95,7 +95,7 @@
 **冪等性**:
 
 - 同じ `requested_at` での再起動は1回のみ（ローカルファイルで記録）
-- 時間窓（±5分）外の古いコマンドは実行しない
+- 時間窓（±6分）外の古いコマンドは実行しない
 - リトライは自動（5分間隔の定期実行により、時間窓内なら自然にリトライ）
 
 ### 2. verify-boot.py
@@ -252,14 +252,16 @@ aws s3 cp s3://${S3_BUCKET}/config/devices/${DEVICE_ID}.json - | jq .reboot
 
 ### 再起動コマンドが繰り返し実行される
 
-- `requested_at` の時間窓（前後5分）を確認
+- `/home/anpi/anpi-watch-pi/config/last_reboot_requested_at.txt` の内容を確認
 - S3設定ファイルの `requested_at` が意図せず更新されていないか確認
+- 必要に応じて `last_reboot_requested_at.txt` を手動更新
 
 ## 制限事項
 
-- 再起動検知の最大遅延: sync_device_config の実行間隔（10分）
+- 再起動検知の最大遅延: check-reboot-command.timer の実行間隔（5分）
+- 再起動コマンドの有効時間窓: `requested_at` の前後6分（合計12分間）
 - pir-watcher動作確認時間: 固定60秒
-- 再起動コマンドの有効期限: なし（手動でクリアする必要あり）
+- 完了記録ファイル: ローカルのみ保存（`last_reboot_requested_at.txt`）
 
 ## 将来の拡張案
 

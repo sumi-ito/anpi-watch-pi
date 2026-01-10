@@ -23,7 +23,7 @@ REPO_ROOT = Path("/home/anpi/anpi-watch-pi")
 CONFIG_FILE = REPO_ROOT / "config" / "local_device_config.json"
 LAST_REBOOT_FILE = REPO_ROOT / "config" / "last_reboot_requested_at.txt"
 TIMEZONE = ZoneInfo("Asia/Tokyo")
-TIME_WINDOW_MINUTES = 5
+TIME_WINDOW_MINUTES = 6
 
 
 def log(message):
@@ -81,7 +81,7 @@ def parse_iso8601(timestamp_str):
 
 
 def is_within_time_window(requested_at_str):
-    """現在時刻がrequested_atの前後5分以内かをチェックする。"""
+    """現在時刻がrequested_atの前後6分以内かをチェックする。"""
     requested_at = parse_iso8601(requested_at_str)
     if not requested_at:
         return False
