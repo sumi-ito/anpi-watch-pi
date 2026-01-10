@@ -1,0 +1,13 @@
+[Unit]
+Description=Verify PIR Watcher after reboot
+After=network-online.target pir-watcher.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /home/anpi/anpi-watch-pi/remote-reboot/verify-boot.py
+Environment="PYTHONUNBUFFERED=1"
+EnvironmentFile=/etc/pir-monitor/config.env
+
+[Install]
+WantedBy=multi-user.target

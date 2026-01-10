@@ -88,6 +88,12 @@ if [ ! -f /etc/systemd/system/log-upload.timer ]; then
   echo "Log management setup completed."
 fi
 
+# 遠隔再起動機能の初期設定（初回のみ）
+if [ ! -f /etc/systemd/system/check-reboot-command.timer ]; then
+  echo "Setting up remote reboot feature..."
+  bash "$REPO/remote-reboot/install.sh"
+fi
+
 # NOTE: 定期的に再起動後に不安定になるため無効化
 # CURRENT_HOUR=$(date +%H)
 # if [ "$CURRENT_HOUR" = "06" ]; then
