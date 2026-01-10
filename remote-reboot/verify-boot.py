@@ -29,13 +29,13 @@ CONFIG_FILE = REPO_ROOT / "config" / "local_device_config.json"
 
 
 def log(message):
-    """Print log message with timestamp."""
+    """タイムスタンプ付きでログメッセージを出力する。"""
     now = datetime.now(TIMEZONE).isoformat()
     print(f"[{now}] {message}", flush=True)
 
 
 def get_service_status(service_name):
-    """Check if systemd service is active."""
+    """systemdサービスがアクティブかをチェックする。"""
     try:
         result = subprocess.run(
             ["systemctl", "is-active", service_name],
@@ -52,7 +52,7 @@ def get_service_status(service_name):
 
 
 def get_uptime_seconds():
-    """Get system uptime in seconds."""
+    """システムの稼働時間を秒単位で取得する。"""
     try:
         with open("/proc/uptime", "r") as f:
             uptime_str = f.read().split()[0]
@@ -63,7 +63,7 @@ def get_uptime_seconds():
 
 
 def get_boot_time():
-    """Get system boot time."""
+    """システムの起動時刻を取得する。"""
     try:
         uptime_seconds = get_uptime_seconds()
         if uptime_seconds is None:
@@ -77,7 +77,7 @@ def get_boot_time():
 
 
 def read_config():
-    """Read local device configuration to get reboot.requested_at."""
+    """ローカルデバイス設定を読み込み、reboot.requested_atを取得する。"""
     if not CONFIG_FILE.exists():
         log(f"Config file not found: {CONFIG_FILE}")
         return None
@@ -91,7 +91,7 @@ def read_config():
 
 
 def create_boot_notification():
-    """Create boot notification JSON data."""
+    """起動通知JSONデータを生成する。"""
     now = datetime.now(TIMEZONE)
     boot_time = get_boot_time()
     uptime = get_uptime_seconds()
@@ -118,7 +118,7 @@ def create_boot_notification():
 
 
 def upload_to_s3(notification):
-    """Upload boot notification to S3."""
+    """起動通知をS3にアップロードする。"""
     now = datetime.now(TIMEZONE)
     timestamp = now.strftime("%Y-%m-%d-%H%M%S")
     s3_key = f"devices/{DEVICE_ID}/boot-notifications/{timestamp}.json"
@@ -153,31 +153,31 @@ def upload_to_s3(notification):
 
 
 def main():
-    """Main entry point."""
+    """メインエントリーポイント。"""
     log("Starting PIR watcher verification after reboot")
 
-    # Initial check
+    # 初回チェック
     if not get_service_status("pir-watcher.service"):
         log("ERROR: pir-watcher.service is not active!")
         sys.exit(1)
 
     log(f"pir-watcher.service is active, waiting {VERIFICATION_WAIT_SECONDS} seconds to verify stability...")
 
-    # Wait for verification period
+    # 検証期間待機
     time.sleep(VERIFICATION_WAIT_SECONDS)
 
-    # Check again after wait
+    # 待機後に再度チェック
     if not get_service_status("pir-watcher.service"):
         log("ERROR: pir-watcher.service stopped during verification period!")
         sys.exit(1)
 
     log(f"pir-watcher.service is still active after {VERIFICATION_WAIT_SECONDS} seconds")
 
-    # Create boot notification
+    # 起動通知を生成
     notification = create_boot_notification()
     log(f"Boot notification data: {json.dumps(notification, indent=2)}")
 
-    # Upload to S3
+    # S3にアップロード
     if upload_to_s3(notification):
         log("Boot verification completed successfully")
         sys.exit(0)

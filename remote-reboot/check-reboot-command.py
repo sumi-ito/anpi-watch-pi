@@ -27,13 +27,13 @@ TIME_WINDOW_MINUTES = 5
 
 
 def log(message):
-    """Print log message with timestamp."""
+    """タイムスタンプ付きでログメッセージを出力する。"""
     now = datetime.now(TIMEZONE).isoformat()
     print(f"[{now}] {message}", flush=True)
 
 
 def read_config():
-    """Read local device configuration."""
+    """ローカルデバイス設定を読み込む。"""
     if not CONFIG_FILE.exists():
         log(f"Config file not found: {CONFIG_FILE}")
         return None
@@ -47,7 +47,7 @@ def read_config():
 
 
 def read_last_reboot_timestamp():
-    """Read the last executed reboot timestamp."""
+    """前回実行した再起動のタイムスタンプを読み込む。"""
     if not LAST_REBOOT_FILE.exists():
         return None
 
@@ -60,7 +60,7 @@ def read_last_reboot_timestamp():
 
 
 def write_last_reboot_timestamp(timestamp):
-    """Write the executed reboot timestamp."""
+    """実行した再起動のタイムスタンプを記録する。"""
     try:
         LAST_REBOOT_FILE.parent.mkdir(parents=True, exist_ok=True)
         with open(LAST_REBOOT_FILE, "w") as f:
@@ -72,7 +72,7 @@ def write_last_reboot_timestamp(timestamp):
 
 
 def parse_iso8601(timestamp_str):
-    """Parse ISO8601 timestamp string to datetime object."""
+    """ISO8601形式のタイムスタンプ文字列をdatetimeオブジェクトに変換する。"""
     try:
         return datetime.fromisoformat(timestamp_str)
     except Exception as e:
@@ -81,7 +81,7 @@ def parse_iso8601(timestamp_str):
 
 
 def is_within_time_window(requested_at_str):
-    """Check if current time is within ±5 minutes of requested_at."""
+    """現在時刻がrequested_atの前後5分以内かをチェックする。"""
     requested_at = parse_iso8601(requested_at_str)
     if not requested_at:
         return False
@@ -97,7 +97,7 @@ def is_within_time_window(requested_at_str):
 
 
 def execute_reboot():
-    """Execute system reboot command."""
+    """システム再起動コマンドを実行する。"""
     log("Executing reboot command...")
     try:
         subprocess.run(["/usr/bin/sudo", "/sbin/reboot"], check=True)
@@ -107,22 +107,22 @@ def execute_reboot():
 
 
 def main():
-    """Main entry point."""
+    """メインエントリーポイント。"""
     log("Starting remote reboot check")
 
-    # Read configuration
+    # 設定を読み込み
     config = read_config()
     if not config:
         log("No valid configuration found, exiting")
         sys.exit(0)
 
-    # Check for reboot field
+    # reboot フィールドをチェック
     reboot_config = config.get("reboot")
     if not reboot_config:
         log("No reboot configuration found, exiting")
         sys.exit(0)
 
-    # Get requested_at timestamp
+    # requested_at タイムスタンプを取得
     requested_at = reboot_config.get("requested_at")
     if not requested_at:
         log("No requested_at timestamp found, exiting")
@@ -130,24 +130,24 @@ def main():
 
     log(f"Found reboot request: {requested_at}")
 
-    # Check if this request was already executed
+    # このリクエストが既に実行済みかチェック
     last_executed = read_last_reboot_timestamp()
     if last_executed == requested_at:
         log(f"This reboot request was already executed (timestamp: {requested_at}), skipping")
         sys.exit(0)
 
-    # Check time window
+    # 時間窓をチェック
     if not is_within_time_window(requested_at):
         log(f"Current time is outside the time window (±{TIME_WINDOW_MINUTES} minutes), skipping")
         sys.exit(0)
 
-    # All conditions met, execute reboot
+    # 全ての条件を満たした、再起動を実行
     log("All conditions met, proceeding with reboot")
 
-    # Record timestamp before reboot
+    # 再起動前にタイムスタンプを記録
     write_last_reboot_timestamp(requested_at)
 
-    # Execute reboot
+    # 再起動を実行
     execute_reboot()
 
 
