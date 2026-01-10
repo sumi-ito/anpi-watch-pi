@@ -58,7 +58,7 @@
 
 ### 起動通知ファイル
 
-**S3パス**: `s3://${S3_BUCKET}/devices/${DEVICE_ID}/boot-notifications/YYYY-MM-DD-HHmmss.json`
+**S3パス**: `s3://${S3_BUCKET}/devices/${DEVICE_ID}/boot-notifications/YYYY-MM-DD-HHmmss-boot-notification.json`
 
 ```json
 {
