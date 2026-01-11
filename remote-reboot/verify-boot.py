@@ -121,7 +121,7 @@ def upload_to_s3(notification):
     """起動通知をS3にアップロードする。"""
     now = datetime.now(TIMEZONE)
     timestamp = now.strftime("%Y-%m-%d-%H%M%S")
-    s3_key = f"devices/{DEVICE_ID}/boot-notifications/{timestamp}-boot-notification.json"
+    s3_key = f"devices/{DEVICE_ID}/notifications/{timestamp}-boot-notification.json"
     s3_uri = f"s3://{S3_BUCKET}/{s3_key}"
 
     try:
