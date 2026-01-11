@@ -58,7 +58,7 @@
 
 ### 起動通知ファイル
 
-**S3パス**: `s3://${S3_BUCKET}/devices/${DEVICE_ID}/notifications/YYYY-MM-DD-HHmmss-boot-notification.json`
+**S3パス**: `s3://${S3_BUCKET}/devices/notifications/${DEVICE_ID}/YYYY-MM-DD-HHmmss-boot-notification.json`
 
 ```json
 {
@@ -109,7 +109,7 @@
 1. pir-watcher.service が `active (running)` 状態か確認
 2. 60秒間待機し、プロセスが継続動作しているか確認
 3. 起動通知JSONを生成
-4. S3にアップロード (`devices/{DEVICE_ID}/notifications/`)
+4. S3にアップロード (`devices/notifications/{DEVICE_ID}/`)
 
 ### 3. systemd設定
 
@@ -226,7 +226,7 @@ sudo systemctl status check-reboot-command.timer
 sudo systemctl list-timers check-reboot-command.timer
 
 # S3で起動通知確認
-aws s3 ls s3://${S3_BUCKET}/devices/${DEVICE_ID}/notifications/
+aws s3 ls s3://${S3_BUCKET}/devices/notifications/${DEVICE_ID}/
 ```
 
 ### 3. ステータス確認
