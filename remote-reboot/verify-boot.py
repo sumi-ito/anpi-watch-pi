@@ -90,6 +90,42 @@ def read_config():
         return None
 
 
+def parse_iso8601(timestamp_str):
+    """ISO8601形式のタイムスタンプ文字列をdatetimeオブジェクトに変換する。"""
+    try:
+        return datetime.fromisoformat(timestamp_str)
+    except Exception as e:
+        log(f"Failed to parse timestamp '{timestamp_str}': {e}")
+        return None
+
+
+def determine_reboot_reason(requested_at, boot_time):
+    """再起動理由を判定する。
+
+    requested_at と boot_time の時刻差が10分以内なら remote_command、
+    それ以外（requested_at が None、または10分以上前）なら manual。
+    """
+    if not requested_at:
+        return "manual"
+
+    # requested_at と boot_time の時刻差をチェック
+    requested_dt = parse_iso8601(requested_at)
+    boot_dt = parse_iso8601(boot_time)
+
+    if not requested_dt or not boot_dt:
+        return "manual"
+
+    # 10分以内なら remote_command、それ以外なら manual
+    time_diff_minutes = abs((boot_dt - requested_dt).total_seconds() / 60)
+
+    log(f"Reboot reason check: requested_at={requested_at}, boot_time={boot_time}, diff={time_diff_minutes:.1f}min")
+
+    if time_diff_minutes <= 10:
+        return "remote_command"
+    else:
+        return "manual"
+
+
 def create_boot_notification():
     """起動通知JSONデータを生成する。"""
     now = datetime.now(TIMEZONE)
@@ -102,13 +138,16 @@ def create_boot_notification():
     if config and "reboot" in config:
         requested_at = config["reboot"].get("requested_at")
 
+    # 再起動理由を判定
+    reboot_reason = determine_reboot_reason(requested_at, boot_time)
+
     notification = {
         "device_id": DEVICE_ID,
         "boot_time": boot_time,
         "verified_at": now.isoformat(),
         "pir_watcher_status": "active" if get_service_status("pir-watcher.service") else "inactive",
         "uptime_seconds": uptime,
-        "reboot_reason": "remote_command" if requested_at else "unknown",
+        "reboot_reason": reboot_reason,
     }
 
     if requested_at:
@@ -121,7 +160,7 @@ def upload_to_s3(notification):
     """起動通知をS3にアップロードする。"""
     now = datetime.now(TIMEZONE)
     timestamp = now.strftime("%Y-%m-%d-%H%M%S")
-    s3_key = f"devices/notifications/{DEVICE_ID}/{timestamp}-boot-notification.json"
+    s3_key = f"notifications/boot/{DEVICE_ID}/{timestamp}-boot-notification.json"
     s3_uri = f"s3://{S3_BUCKET}/{s3_key}"
 
     try:

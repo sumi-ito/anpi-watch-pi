@@ -58,7 +58,7 @@
 
 ### 起動通知ファイル
 
-**S3パス**: `s3://${S3_BUCKET}/devices/notifications/${DEVICE_ID}/YYYY-MM-DD-HHmmss-boot-notification.json`
+**S3パス**: `s3://${S3_BUCKET}/notifications/boot/${DEVICE_ID}/YYYY-MM-DD-HHmmss-boot-notification.json`
 
 ```json
 {
@@ -71,6 +71,13 @@
   "requested_at": "2026-01-08T15:30:00+09:00"
 }
 ```
+
+#### `reboot_reason` フィールド仕様
+
+| 値 | 説明 |
+|-----------|------|
+| `remote_command` | 遠隔再起動コマンドによる再起動（`requested_at` が存在し、起動時刻から10分以内） |
+| `manual` | 手動再起動、停電、その他の理由（`requested_at` が存在しない、または10分以上前）|
 
 ## コンポーネント
 
@@ -109,7 +116,7 @@
 1. pir-watcher.service が `active (running)` 状態か確認
 2. 60秒間待機し、プロセスが継続動作しているか確認
 3. 起動通知JSONを生成
-4. S3にアップロード (`devices/notifications/{DEVICE_ID}/`)
+4. S3にアップロード (`notifications/boot/{DEVICE_ID}/`)
 
 ### 3. systemd設定
 
@@ -226,7 +233,7 @@ sudo systemctl status check-reboot-command.timer
 sudo systemctl list-timers check-reboot-command.timer
 
 # S3で起動通知確認
-aws s3 ls s3://${S3_BUCKET}/devices/notifications/${DEVICE_ID}/
+aws s3 ls s3://${S3_BUCKET}/notifications/boot/${DEVICE_ID}/
 ```
 
 ### 3. ステータス確認
