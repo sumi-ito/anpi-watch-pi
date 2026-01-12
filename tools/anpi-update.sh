@@ -8,9 +8,19 @@ cd "$REPO"
 # 念のため許可（環境により safe.directory が必要）
 # git config --global --add safe.directory "$REPO" || true
 
-# 更新（main ブランチ想定）
-git fetch --prune
-git reset --hard origin/main
+# 現在のブランチを取得
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+# main ブランチの場合のみ更新
+if [ "$CURRENT_BRANCH" = "main" ]; then
+  echo "On main branch, updating from origin..."
+  git fetch --prune
+  git reset --hard origin/main
+else
+  echo "On branch '$CURRENT_BRANCH', skipping git reset (development mode)"
+  echo "Note: Only pulling latest changes, not resetting..."
+  git fetch --prune || true
+fi
 
 if [ ! -f /etc/systemd/system/pir-watcher.service ]; then
   echo "Setting up pir-watcher daemon..."
