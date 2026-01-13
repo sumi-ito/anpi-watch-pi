@@ -1,0 +1,10 @@
+[Unit]
+Description=Check for remote reboot command
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /home/anpi/anpi-watch-pi/remote-reboot/check-reboot-command.py
+Environment="PYTHONUNBUFFERED=1"
+EnvironmentFile=/etc/pir-monitor/config.env
