@@ -67,6 +67,26 @@ def detect_device_model():
 
 DEVICE_MODEL = detect_device_model()
 
+# 設定ファイル読み込み
+def load_device_config():
+    """config/local_device_config.json から設定を読み込む"""
+    try:
+        script_dir = Path(__file__).resolve().parent
+        config_file = script_dir.parent / "config" / "local_device_config.json"
+        with open(config_file, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        logger.error(f"Config file not found: {config_file}")
+        raise
+    except json.JSONDecodeError as e:
+        logger.error(f"Invalid JSON in config file: {e}")
+        raise
+    except Exception as e:
+        logger.error(f"Failed to load config file: {e}")
+        raise
+
+DEVICE_CONFIG = load_device_config()
+
 # 感度プリセット: {device_model: {sensitivity: {param: value}}}
 SENSITIVITY_PRESETS = {
     "zero2": {
@@ -111,8 +131,12 @@ SENSITIVITY_PRESETS = {
     },
 }
 
-# 感度レベルの取得（環境変数またはデフォルト）
-SENSITIVITY = os.environ.get("SENSITIVITY", "medium").lower()
+# 感度レベルの取得（設定ファイルから、デフォルト: medium）
+try:
+    SENSITIVITY = DEVICE_CONFIG.get("settings", {}).get("sensitivity", "medium").lower()
+except Exception as e:
+    logger.error(f"Failed to get sensitivity from config: {e}")
+    SENSITIVITY = "medium"
 
 # パラメータの決定（プリセットまたは環境変数で個別指定）
 def get_param(param_name, default_value):
@@ -172,7 +196,8 @@ def put_s3_if_new(local_flag_path: str, s3_key: str):
     motion_data = {
         "timestamp": s3_key,
         "version": VERSION,
-        "device_model": DEVICE_MODEL
+        "device_model": DEVICE_MODEL,
+        "sensitivity": SENSITIVITY
     }
     s3_uri = f"s3://{S3_BUCKET}/devices/{DEVICE_ID}/motion/{s3_key}"
     data = json.dumps(motion_data, ensure_ascii=False).encode()
@@ -197,7 +222,8 @@ def main():
 
     # 起動時パラメータ表示
     logger.info("=== PIR Watcher Started ===")
-    logger.info(f"version={VERSION} device_model={DEVICE_MODEL} sensitivity={SENSITIVITY}")
+    logger.info(f"PIR Watcher started (sensitivity: {SENSITIVITY}, threshold: {THRESHOLD})")
+    logger.info(f"version={VERSION} device_model={DEVICE_MODEL}")
     logger.info(f"params: LEAK_PER_SEC={LEAK_PER_SEC} INC_PER_EVENT={INC_PER_EVENT} THRESHOLD={THRESHOLD} BUFFER_SEC={BUFFER_SEC} MAX_SCORE={MAX_SCORE}")
     logger.info(f"slot_interval={SLOT_MIN}min")
     logger.info("===========================")
