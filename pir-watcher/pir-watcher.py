@@ -132,11 +132,7 @@ SENSITIVITY_PRESETS = {
 }
 
 # 感度レベルの取得（設定ファイルから、デフォルト: medium）
-try:
-    SENSITIVITY = DEVICE_CONFIG.get("settings", {}).get("sensitivity", "medium").lower()
-except Exception as e:
-    logger.error(f"Failed to get sensitivity from config: {e}")
-    SENSITIVITY = "medium"
+SENSITIVITY = DEVICE_CONFIG.get("settings", {}).get("sensitivity", "medium").lower()
 
 # パラメータの決定（プリセットまたは環境変数で個別指定）
 def get_param(param_name, default_value):
