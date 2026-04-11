@@ -1,0 +1,53 @@
+{
+  "name": "開発マシンzero2",
+  "enabled": true,
+  "test_mode": true,
+  "expires": "2026-11-30T23:59:59+09:00",
+  "no_motion_hours": 8,
+  "heartbeat_grace_minutes": 150,
+  "cpu_temp_threshold": 70,
+  "exclude_periods": [
+    {
+      "from": "2025-10-13",
+      "to": "2025-10-13"
+    }
+  ],
+  "check_weekdays": [0, 1, 2, 3, 4],
+  "resumption_notifier": {
+    "enabled": true,
+    "trigger_hours": -4
+  },
+  "activity_report": {
+    "enabled": true,
+    "report_hours": 12,
+    "schedule_times": ["09:00", "21:00"],
+    "timezone": "Asia/Tokyo",
+    "min_motion_count": 0,
+    "include_no_activity_alert": true,
+    "report_type": "summary",
+    "report_weekdays": [0, 1, 2, 3, 4, 5, 6],
+    "destinations": [
+      {
+        "email": "example@example.com",
+        "notification_type": "min_motion_count",
+        "min_motion_count": 30
+      }
+    ]
+  },
+  "reboot": {
+    "requested_at": "2026-01-13T12:00:00+09:00"
+  },
+  "notification": {
+    "slack": {
+      "webhook_url": "https://hooks.slack.com/services/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+    }
+  },
+  "bluetooth": {
+    "device_mac": "XX:XX:XX:XX:XX:XX"
+  },
+  "env": "development",
+  "settings": {
+    "sensitivity": "low"
+  },
+  "device_id": "dev-zero-2"
+}

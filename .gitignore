@@ -2,3 +2,4 @@ config.env
 config/local_device_config.json
 config/runtime_status.json
 *.log
+.claude/skills/
