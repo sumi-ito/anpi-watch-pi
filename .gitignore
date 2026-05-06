@@ -1,5 +1,7 @@
 config.env
 config/local_device_config.json
 config/runtime_status.json
+config/last_reboot_requested_at.txt
 *.log
 .claude/skills/
+venv/
